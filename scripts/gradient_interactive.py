@@ -18,6 +18,7 @@ from matplotlib import collections
 from scipy.ndimage.morphology import distance_transform_edt as bwdist
 from math import *
 import random
+from potential_fields import gradient_planner, combined_potential
 from impedance.impedance_modeles import *
 import time
 
@@ -31,76 +32,13 @@ import os
 import rospy
 from geometry_msgs.msg import TransformStamped
 import swarmlib
+import crazyflie
 
 
 def poly_area(x,y):
     # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
     # https://en.wikipedia.org/wiki/Shoelace_formula
     return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
-
-def meters2grid(pose_m, nrows=500, ncols=500):
-    # [0, 0](m) -> [250, 250]
-    # [1, 0](m) -> [250+100, 250]
-    # [0,-1](m) -> [250, 250-100]
-    pose_on_grid = np.array(pose_m)*100 + np.array([ncols/2, nrows/2])
-    return np.array( pose_on_grid, dtype=int)
-def grid2meters(pose_grid, nrows=500, ncols=500):
-    # [250, 250] -> [0, 0](m)
-    # [250+100, 250] -> [1, 0](m)
-    # [250, 250-100] -> [0,-1](m)
-    pose_meters = ( np.array(pose_grid) - np.array([ncols/2, nrows/2]) ) / 100.0
-    return pose_meters
-
-def gradient_planner(f, current_point, ncols=500, nrows=500, movement_rate=0.06):
-    """
-    GradientBasedPlanner : This function computes the next_point
-    given current location, goal location and potential map, f.
-    It also returns mean velocity, V, of the gradient map in current point.
-    """
-    [gy, gx] = np.gradient(-f);
-    iy, ix = np.array( meters2grid(current_point), dtype=int )
-    w = 20 # smoothing window size for gradient-velocity
-    vx = np.mean(gx[ix-int(w/2) : ix+int(w/2), iy-int(w/2) : iy+int(w/2)])
-    vy = np.mean(gy[ix-int(w/2) : ix+int(w/2), iy-int(w/2) : iy+int(w/2)])
-    V = np.array([vx, vy])
-    dt = 0.06 / norm(V);
-    next_point = current_point + dt*V;
-
-    return next_point, V
-
-def combined_potential(obstacles_poses, goal, attractive_coef=1.700, repulsive_coef=200, nrows=500, ncols=500):
-    """ Repulsive potential """
-    obstacles_map = map(obstacles_poses)
-    goal = meters2grid(goal)
-    d = bwdist(obstacles_map==0);
-    d2 = d/100. + 1 # Rescale and transform distances
-    d0 = 2
-    nu = repulsive_coef;
-    repulsive = nu*((1./d2 - 1./d0)**2);
-    repulsive [d2 > d0] = 0
-    """ Attractive potential """
-    [x, y] = np.meshgrid(np.arange(ncols), np.arange(nrows))
-    xi = attractive_coef
-    attractive = xi * ( (x - goal[0])**2 + (y - goal[1])**2 )
-    """ Combine terms """
-    f = attractive + repulsive
-    return f
-
-def map(obstacles_poses, borders_width=2, nrows=500, ncols=500):
-    """ Obstacles map """
-    obstacles_map = np.zeros((nrows, ncols));
-    [x, y] = np.meshgrid(np.arange(ncols), np.arange(nrows))
-    for pose in obstacles_poses:
-        pose = meters2grid(pose)
-        x0 = pose[0]; y0 = pose[1]
-        # cylindrical obstacles
-        t = ((x - x0)**2 + (y - y0)**2) < (100*R_obstacles)**2
-        obstacles_map[t] = 1;
-    # borders are obstacles
-    obstacles_map[:,:int(borders_width/2)] = 1; obstacles_map[:,-int(borders_width/2)] = 1
-    obstacles_map[:int(borders_width/2),:] = 1; obstacles_map[-int(borders_width/2):,:] = 1
-
-    return obstacles_map
 
 def move_obstacles(obstacles_poses, obstacles_goal_poses):
     """ All of the obstacles tend to go to the origin, (0,0) - point """
@@ -116,37 +54,24 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 
     return obstacles_poses
 
-
-def formation(num_robots, leader_des, v, R_swarm):
-    if num_robots<=1: return []
-    u = np.array([-v[1], v[0]])
-    des4 = leader_des - v*R_swarm*sqrt(3)                 # follower
-    if num_robots==2: return [des4]
-    des2 = leader_des - v*R_swarm*sqrt(3)/2 + u*R_swarm/2 # follower
-    des3 = leader_des - v*R_swarm*sqrt(3)/2 - u*R_swarm/2 # follower
-    if num_robots==3: return [des2, des3]
-    
-    return [des2, des3, des4]
-
 """ initialization """
-animate              = 1   # show 1-each frame or 0-just final configuration
-random_obstacles     = 1   # randomly distributed obstacles on the map
-num_random_obstacles = 8   # number of random circular obstacles on the map
-moving_obstacles     = 1   # 0-static or 1-dynamic obstacles
-impedance            = 1   # impedance links between the leader and followers (leader's velocity)
+random_obstacles     = 0   # randomly distributed obstacles on the map
+num_random_obstacles = 4   # number of random circular obstacles on the map
+moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
+impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 formation_gradient   = 1   # followers are attracting to their formation position and repelling from obstacles
-draw_gradients       = 1   # 1-gradients plot, 0-grid
+draw_gradients       = 1
 
 """ human guided swarm params """
 human_name           = 'palm' # Vicon mocap object
-pos_coef             = 4.0    # scale of the leader's movement relatively to the human operator
+pos_coef             = 2.0    # scale of the leader's movement relatively to the human operator
 initialized          = False  # is always inits with False: for relative position control
+repel_robots         = 1      # robots repel from each other inside the formation
+influence_radius     = 10     # repelling strength
 
 R_obstacles = 0.2 # [m]
-R_swarm     = 0.3  # [m]
-attractive_coef = 1./700
-repulsive_coef  = 200
-start = np.array([-1.8, 1.8]); goal = np.array([1.8, -1.8])
+l           = 0.35  # [m]
+start = np.array([-1.8, 1.8]); goal = np.array([1.2, -1.2])
 V0 = (goal - start) / norm(goal-start)    # initial movement direction, |V0| = 1
 U0 = np.array([-V0[1], V0[0]]) / norm(V0) # perpendicular to initial movement direction, |U0| = 1
 imp_pose_prev = np.array([0, 0])
@@ -156,13 +81,14 @@ imp_time_prev = time.time()
 # flight parameters
 toFly                = 0   # 0-simulation, 1-real drones
 TakeoffHeight        = 1.0
-TimeToTakeoff          = 5.0
+TimeToTakeoff        = 5.0
+HUMAN_Z_TO_LAND      = 0.5
 position_initialized = False # should be False at the begininng
-put_limits       = 1
 limits           = np.array([ 1.7,  1.7,  2.5]) # limits desining safety flight area in the room
 limits_negative  = np.array([-1.7, -1.5, -0.1])
 
 cf_names = ['cf1', 'cf2', 'cf3', 'cf4']
+# cf_names = ['cf1', 'cf2', 'cf3']
 num_robots = len(cf_names)   # <=4, number of drones in formation
 if num_robots > 4: num_robots = 4
 
@@ -171,7 +97,7 @@ if random_obstacles:
     obstacles_poses      = np.random.uniform(low=-2.5, high=2.5, size=(num_random_obstacles,2)) # randomly located obstacles
     obstacles_goal_poses = np.random.uniform(low=-1.3, high=1.3, size=(num_random_obstacles,2)) # randomly located obstacles goal poses: for moving obstacles
 else:
-    obstacles_poses      = np.array([[-2, 1], [1.5, 0.5], [-1.0, 1.5], [0.1, 0.1], [1, -2], [-1.8, -1.8]]) # 2D - coordinates [m]
+    obstacles_poses      = np.array([[-1, 1], [1.0, 0.5], [-1.0, 0.3], [0.1, 0.1], [1, -0.3], [-0.8, -0.8]]) # 2D - coordinates [m]
     obstacles_goal_poses = np.array([[-0, 0], [0.0, 0.0], [ 0.0, 0.0], [0.0, 0.0], [0,  0], [ 0.0,  0.0]]) # for moving obstacles
 
 
@@ -223,18 +149,18 @@ if __name__ == '__main__':
         swarm[0].sp = np.array([  drone1_pose_init[0] + pos_coef*dx,
                                 drone1_pose_init[1] + pos_coef*dy,
                                 TakeoffHeight]) # from 2D to 3D, adding z=TakeoffHeight for the leader drone
-        f1 = combined_potential(obstacles_poses, swarm[0].sp[:2], attractive_coef=attractive_coef, repulsive_coef=repulsive_coef)
+        f1 = combined_potential(obstacles_poses, R_obstacles, swarm[0].sp[:2], influence_radius=influence_radius)
         swarm[0].sp[:2], swarm[0].vel[:2] = gradient_planner(f1, swarm[0].sp[:2])
 
         # limit the leaders position to remain within specified area
-        if put_limits:
+        if toFly:
             np.putmask(swarm[0].sp, swarm[0].sp >= limits, limits)
             np.putmask(swarm[0].sp, swarm[0].sp <= limits_negative, limits_negative)
 
         # drones polygonal formation
         direction = np.array([cos(human.orient[2]), sin(human.orient[2])])
         v = direction; u = np.array([-v[1], v[0]]) # u is prepedicular vector to v-human yaw direction
-        followers_sp = formation(num_robots, swarm[0].sp[:2], direction, R_swarm)
+        followers_sp = formation(num_robots, swarm[0].sp[:2], direction, l)
         for i in range(len(followers_sp)):
             swarm[i+1].sp = followers_sp[i].tolist() + [TakeoffHeight] # from 2D to 3D, adding z=TakeoffHeight for each follower
 
@@ -257,10 +183,18 @@ if __name__ == '__main__':
             if num_robots>=4:
                 swarm[0].sp[:2] += -du * u + dv * v
 
+        robots_poses = []
+        for drone in swarm:
+            robots_poses.append(drone.pose[:2])
         if formation_gradient:
             # following drones are attracting to desired points - vertices of the polygonal formation
-            for p in range(1, num_robots):
-                f = combined_potential(obstacles_poses, swarm[p].sp[:2], attractive_coef=attractive_coef, repulsive_coef=repulsive_coef)
+            for p in range(num_robots):
+                if repel_robots:
+                    robots_obstacles = [x for i,x in enumerate(robots_poses) if i!=p]
+                    obstacles_and_another_drones_poses = np.array(robots_obstacles + obstacles_poses.tolist())
+                    f = combined_potential(obstacles_and_another_drones_poses, R_obstacles, swarm[p].sp[:2], influence_radius=2)
+                else:
+                    f = combined_potential(obstacles_poses, R_obstacles, swarm[p].sp[:2], influence_radius=influence_radius)
                 swarm[p].sp[:2], swarm[p].vel[:2] = gradient_planner(f, swarm[p].sp[:2])
 
 
@@ -270,12 +204,31 @@ if __name__ == '__main__':
 
         # TO VISUALIZE
         human.publish_position()
+        human.publish_path()
         path_limit = 1000 # [frames]
         for drone in swarm:
             drone.publish_sp()
-            drone.publish_path(limit=path_limit)   # set -1 for unlimited path
+            drone.publish_path_sp(limit=path_limit) # set -1 for unlimited path
         for obstacle in obstacles_array:
             obstacle.publish_position()
+
+        # Landing
+        if toFly and human.position()[2]<HUMAN_Z_TO_LAND:
+            print 'Landing!!!'
+            for drone in swarm:
+                drone.landing_pose = drone.position()
+            while not rospy.is_shutdown():
+                for drone in swarm:
+                    drone.sp = drone.landing_pose
+                    drone.landing_pose[2] -= 0.002
+                    drone.fly()
+                if swarm[0].sp[2]<-1:
+                    time.sleep(1)
+                    for cf in cf_list:
+                        for t in range(3): cf.stop()
+                    print 'reached the floor, shutdown'
+                    rospy.signal_shutdown('landed')
+                rate.sleep()
 
         rate.sleep()
 

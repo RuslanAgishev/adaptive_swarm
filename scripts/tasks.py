@@ -31,19 +31,21 @@ def draw_map(start, goal, obstacles_poses, R_obstacles, f=None, draw_gradients=T
     ax.add_patch(rect2)
     ax.add_patch(rect3)
     
-def draw_robots(current_point1, routes=None, num_robots=None, robots_poses=None, centroid=None, vel1=None):
-    if vel1 is not None: plt.arrow(current_point1[0], current_point1[1], vel1[0], vel1[1], width=0.01, head_width=0.05, head_length=0.1, fc='k')
-    plt.plot(routes[0][:,0], routes[0][:,1], 'green', linewidth=2)
-    for r in range(1, num_robots):
-        plt.plot(routes[r][:,0], routes[r][:,1], '--', color='blue', linewidth=2)
+def draw_robots(current_point1, R_drones, routes=None, num_robots=None, robots_poses=None, centroid=None, vel1=None, plot_routes=1, plot_arrow=0):
+    if vel1 is not None and plot_arrow: plt.arrow(current_point1[0], current_point1[1], vel1[0], vel1[1], width=0.01, head_width=0.05, head_length=0.1, fc='k')
+    if plot_routes:
+        plt.plot(routes[0][:,0], routes[0][:,1], 'green', linewidth=2)
+        for r in range(1, num_robots):
+            plt.plot(routes[r][:,0], routes[r][:,1], '--', color='blue', linewidth=2)
 
     for pose in robots_poses:
-        plt.plot(pose[0], pose[1], 'ro', color='blue')
+        plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*300, color='blue')
     # compute centroid and sort poses by polar angle
-    pp = robots_poses
-    pp.sort(key=lambda p: atan2(p[1]-centroid[1],p[0]-centroid[0]))
-    formation = patches.Polygon(pp, color='blue', fill=False, linewidth=2);
-    plt.gca().add_patch(formation)
+    if num_robots<7:
+        pp = robots_poses
+        pp.sort(key=lambda p: atan2(p[1]-centroid[1],p[0]-centroid[0]))
+        formation = patches.Polygon(pp, color='blue', fill=False, linewidth=2);
+        plt.gca().add_patch(formation)
     plt.plot(centroid[0], centroid[1], '*', color='blue')
 
 def get_movie_writer(should_write_movie, title, movie_fps, plot_pause_len):
@@ -104,3 +106,31 @@ def euler_from_quaternion(q):
     pitch = asin(-2.0*(qx*qz - qw*qy))
     yaw = atan2(2.0*(qx*qy + qw*qz), qw*qw + qx*qx - qy*qy - qz*qz)
     return roll, pitch, yaw
+
+
+def formation(num_robots, leader_des, v, l):
+    """
+    geometry of the swarm: following robots desired locations
+    relatively to the leader
+    """
+    u = np.array([-v[1], v[0]])
+    """ followers positions """
+    des2 = leader_des - v*l*sqrt(3)/2 + u*l/2
+    des3 = leader_des - v*l*sqrt(3)/2 - u*l/2
+    des4 = leader_des - v*l*sqrt(3)
+    des5 = leader_des - v*l*sqrt(3)   + u*l
+    des6 = leader_des - v*l*sqrt(3)   - u*l
+    des7 = leader_des - v*l*sqrt(3)*3/2 - u*l/2
+    des8 = leader_des - v*l*sqrt(3)*3/2 + u*l/2
+    des9 = leader_des - v*l*sqrt(3)*2
+    if num_robots<=1: return []
+    if num_robots==2: return [des4]
+    if num_robots==3: return [des2, des3]
+    if num_robots==4: return [des2, des3, des4]
+    if num_robots==5: return [des2, des3, des4, des5]
+    if num_robots==6: return [des2, des3, des4, des5, des6]
+    if num_robots==7: return [des2, des3, des4, des5, des6, des7]
+    if num_robots==8: return [des2, des3, des4, des5, des6, des7, des8]
+    if num_robots==9: return [des2, des3, des4, des5, des6, des7, des8, des9]
+    
+    return [des2, des3, des4]
