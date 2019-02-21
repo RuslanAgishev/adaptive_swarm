@@ -6,9 +6,12 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from potential_fields import gradient_planner, combined_potential
 
+plt.rcParams.update({'font.size': 20})
+
 
 def gradient_plot(x,y, gx,gy, skip=10):
-    plt.figure(figsize=(12,8))
+    # plt.figure(figsize=(12,8))
+    plt.figure()
     Q = plt.quiver(x[::skip, ::skip], y[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip],
                    pivot='mid', units='inches')
     qk = plt.quiverkey(Q, 0.9, 0.9, 1, r'$1 \frac{m}{s}$', labelpos='E',
@@ -57,10 +60,12 @@ obstacle = np.zeros((nrows, ncols));
 
 # Generate some obstacle
 obstacle [300:, 100:250] = True;
-obstacle [150:200, 400:500] = True;
-t = ((x - 200)**2 + (y - 50)**2) < 50**2;
+# obstacle [150:200, 400:500] = True;
+t = ((x - 200)**2 + (y - 50)**2) < 40**2;
 obstacle[t] = True;
-t = ((x - 400)**2 + (y - 300)**2) < 100**2;
+t = ((x - 400)**2 + (y - 200)**2) < 40**2;
+obstacle[t] = True;
+t = ((x - 50)**2 + (y - 100)**2) < 40**2;
 obstacle[t] = True;
 # plt.imshow(obstacle, 'gray')
 
@@ -75,17 +80,15 @@ nu = 800
 repulsive = nu*((1./d2 - 1./d0)**2)
 repulsive [d2 > d0] = 0
 
-# Display repulsive potential
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-plt.title ('Repulsive Potential')
+# # Display repulsive potential
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# plt.title ('Repulsive Potential')
 
-# Plot the surface.
-surf = ax.plot_surface(x, y, repulsive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+# # Plot the surface.
+# surf = ax.plot_surface(x, y, repulsive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
-
-
-# Compute attractive force
+# # Compute attractive force
 goal = [400, 50];
 start = [50, 350];
 
@@ -93,59 +96,64 @@ xi = 1./700
 
 attractive = xi * ( (x - goal[0])**2 + (y - goal[1])**2 );
 
-# Display attractive potential
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-ax.plot_surface(x, y, attractive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-plt.title ('Attractive Potential')
+# # Display attractive potential
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# ax.plot_surface(x, y, attractive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+# plt.title ('Attractive Potential')
 
-
-# Combine terms
+# # Combine terms
 f = attractive + repulsive
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-ax.plot_surface(x, y, f, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+surf = ax.plot_surface(y, x, f, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 plt.title ('Total Potential')
+# Add a color bar which maps values to colors.
+fig.colorbar(surf, shrink=0.5, aspect=5)
+plt.xlabel('X [cm]')
+plt.ylabel('Y [cm]')
+ax.set_zlabel('f(x,y)')
 
-
-# Display 2D configuration space
+# # Display 2D configuration space
 # plt.figure()
-# plt.imshow(1-obstacle, 'gray');
-# plt.plot (start[0], start[1], 'ro', markersize=10);
-# plt.plot (goal[0], goal[1], 'ro', color='green', markersize=10);
+# plt.imshow(1-obstacle, 'gray')
+# plt.plot (start[0], start[1], 'ro', markersize=10, label='start')
+# plt.plot (goal[0], goal[1], 'ro', color='green', markersize=10, label='goal')
 # # plt.axis ([0, ncols, 0, nrows]);
-# plt.xlabel ('x');
-# plt.ylabel ('y');
-# plt.title ('Configuration Space');
+# plt.xlabel('X [cm]')
+# plt.ylabel('Y [cm]')
+# plt.legend()
+# plt.title ('2D map with obstacles')
 
-# # Plan route
-# route = GradientBasedPlanner(f, start, goal, 700);
+# Plan route
+route = GradientBasedPlanner(f, start, goal, 700);
 
-# # Compute gradients for visualization
-# [gx, gy] = np.gradient(-f);
-
-
-# # plt.figure(figsize=(12,8))
-# # plt.imshow(gy, 'gray')
-# # plt.title('Gx=df/dx - gradient')
+# Compute gradients for visualization
+[gx, gy] = np.gradient(-f);
 
 
-# # plt.figure(figsize=(12,8))
-# # plt.imshow(gx, 'gray')
-# # plt.title('Gy=df/dy - gradient')
+# plt.figure(figsize=(12,8))
+# plt.imshow(gy, 'gray')
+# plt.title('Gx=df/dx - gradient')
 
 
-# # Velocities plot
-# skip = 10;
-# xidx = np.arange(0,ncols,skip)
-# yidx = np.arange(0,nrows,skip)
-# gradient_plot(x,y, gy,gx, skip=10)
+# plt.figure(figsize=(12,8))
+# plt.imshow(gx, 'gray')
+# plt.title('Gy=df/dy - gradient')
+
+
+# Velocities plot
+skip = 10;
+xidx = np.arange(0,ncols,skip)
+yidx = np.arange(0,nrows,skip)
+gradient_plot(x,-y, gy,-gx, skip=10)
 
 # plt.plot(start[0], start[1], 'ro', markersize=10);
 # plt.plot(goal[0], goal[1], 'ro', color='green', markersize=10);
 # plt.plot(route[:,0], route[:,1], linewidth=3);
-# plt.xlabel('X')
-# plt.ylabel('Y')
+plt.xlabel('X [cm]')
+plt.ylabel('Y [cm]')
+plt.title('Gradient plot')
 
 plt.draw()
 plt.pause(1)

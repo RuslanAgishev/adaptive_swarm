@@ -39,7 +39,8 @@ def draw_robots(current_point1, R_drones, routes=None, num_robots=None, robots_p
             plt.plot(routes[r][:,0], routes[r][:,1], '--', color='blue', linewidth=2)
 
     for pose in robots_poses:
-        plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*300, color='blue')
+        # plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*300, color='blue')
+        plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*30, color='blue')
     # compute centroid and sort poses by polar angle
     if num_robots<7:
         pp = robots_poses

@@ -46,7 +46,7 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 animate              = 1   # show 1-each frame or 0-just final configuration
 random_obstacles     = 0   # randomly distributed obstacles on the map
 num_random_obstacles = 8   # number of random circular obstacles on the map
-num_robots           = 6   # <=9, number of drones in formation
+num_robots           = 4   # <=9, number of drones in formation
 moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
 impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 impedance_mode       = 'overdamped'    # 'underdamped', 'overdamped', 'critically_damped', 'oscillations'
