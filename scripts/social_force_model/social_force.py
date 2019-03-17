@@ -15,7 +15,7 @@ AGENTSIZE = 9
 AGENTSICKNESS = 3
 nrows = 1000; ncols = 1000
 GRIDSIZE = [nrows, ncols]
-ROBOTSNUMBER = 6
+ROBOTSNUMBER = 8
 
 
 pygame.init()
