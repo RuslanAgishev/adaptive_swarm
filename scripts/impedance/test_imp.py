@@ -27,7 +27,7 @@ t = np.linspace(0, 4*pi, 101)
 modes = ['underdamped', 'overdamped', 'critically_damped', 'oscillations']
 
 
-
+plt.rcParams.update({'font.size': 18})
 plt.figure()
 plt.grid()
 plt.title('Impedance modeles')

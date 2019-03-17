@@ -63,11 +63,11 @@ formation_gradient   = 1   # followers are attracting to their formation positio
 draw_gradients       = 1
 
 """ human guided swarm params """
-human_name           = 'palm' # Vicon mocap object
-pos_coef             = 2.0    # scale of the leader's movement relatively to the human operator
+human_name           = 'glove' # Vicon mocap object, e.g: 'palm', 'glove'
+pos_coef             = 1.6    # scale of the leader's movement relatively to the human operator
 initialized          = False  # is always inits with False: for relative position control
-repel_robots         = 1      # robots repel from each other inside the formation
-influence_radius     = 10     # repelling strength
+repel_robots         = 0      # robots repel from each other inside the formation
+influence_radius     = 15     # repelling strength
 
 R_obstacles = 0.2 # [m]
 l           = 0.35  # [m]
@@ -79,10 +79,10 @@ imp_vel_prev  = np.array([0, 0])
 imp_time_prev = time.time()
 
 # flight parameters
-toFly                = 0   # 0-simulation, 1-real drones
-TakeoffHeight        = 1.0
-TimeToTakeoff        = 5.0
-HUMAN_Z_TO_LAND      = 0.5
+toFly                = 1   # 0-simulation, 1-real drones
+TakeoffHeight        = 1.2
+TimeToTakeoff        = 7.0
+HUMAN_Z_TO_LAND      = 0.8
 position_initialized = False # should be False at the begininng
 limits           = np.array([ 1.7,  1.7,  2.5]) # limits desining safety flight area in the room
 limits_negative  = np.array([-1.7, -1.5, -0.1])
@@ -92,6 +92,8 @@ cf_names = ['cf1', 'cf2', 'cf3', 'cf4']
 num_robots = len(cf_names)   # <=4, number of drones in formation
 if num_robots > 4: num_robots = 4
 
+
+obstacles_names = ['obstacle4', 'obstacle11', 'obstacle12'] # Vicon objects
 
 if random_obstacles:
     obstacles_poses      = np.random.uniform(low=-2.5, high=2.5, size=(num_random_obstacles,2)) # randomly located obstacles
@@ -111,6 +113,10 @@ if __name__ == '__main__':
     swarm[0].leader=True
 
     # Obstacles init
+    obstacles_poses = []
+    for name in obstacles_names:
+        obstacles_poses.append(swarmlib.Mocap_object(name).position()[:2])
+    obstacles_poses = np.array(obstacles_poses)
     obstacles_array = []
     for ind in range(len(obstacles_poses)):
         obstacles_array.append( swarmlib.Obstacle('obstacle_%d' %ind) )
@@ -192,7 +198,7 @@ if __name__ == '__main__':
                 if repel_robots:
                     robots_obstacles = [x for i,x in enumerate(robots_poses) if i!=p]
                     obstacles_and_another_drones_poses = np.array(robots_obstacles + obstacles_poses.tolist())
-                    f = combined_potential(obstacles_and_another_drones_poses, R_obstacles, swarm[p].sp[:2], influence_radius=2)
+                    f = combined_potential(obstacles_and_another_drones_poses, R_obstacles, swarm[p].sp[:2], influence_radius=3)
                 else:
                     f = combined_potential(obstacles_poses, R_obstacles, swarm[p].sp[:2], influence_radius=influence_radius)
                 swarm[p].sp[:2], swarm[p].vel[:2] = gradient_planner(f, swarm[p].sp[:2])
