@@ -75,14 +75,14 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 animate              = 1   # show 1-each frame or 0-just final configuration
 random_obstacles     = 0   # randomly distributed obstacles on the map
 num_random_obstacles = 8   # number of random circular obstacles on the map
-num_robots           = 3   # <=4, number of drones in formation
+num_robots           = 6   # <=4, number of drones in formation
 moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
-impedance            = 1   # impedance links between the leader and followers (leader's velocity)
+impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 impedance_mode       = 'overdamped'    # 'underdamped', 'overdamped', 'critically_damped', 'oscillations'
 formation_gradient   = 0   # followers are attracting to their formation position and repelling from obstacles
 draw_gradients       = 0   # 1-gradients plot, 0-grid
 postprocessing       = 1   # show processed data figures after the flight
-max_its              =  120 # max number of allowed iters for formation to reach the goal
+max_its              = 120 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
 should_write_movie = 0; movie_file_name = os.getcwd()+'/videos/output.avi'
@@ -148,7 +148,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
             imp_pose_prev = imp_pose
             imp_vel_prev = imp_vel
 
-            imp_scale = 0.3
+            imp_scale = 0.1
             # des_poses[0] += 0.1*imp_scale * imp_pose
             du = imp_scale*np.dot(imp_pose, u)/norm(u) # u-vector direction
             dv = imp_scale*np.dot(imp_pose, v)/norm(v) # v-vector direction
