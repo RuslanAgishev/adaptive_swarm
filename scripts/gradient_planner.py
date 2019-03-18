@@ -130,7 +130,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
             imp_pose_prev = imp_pose
             imp_vel_prev = imp_vel
 
-            imp_scale = 0.3
+            imp_scale = 0.1
             # des_poses[0] += 0.1*imp_scale * imp_pose
             du = imp_scale*np.dot(imp_pose, u)/norm(u) # u-vector direction
             dv = imp_scale*np.dot(imp_pose, v)/norm(v) # v-vector direction
