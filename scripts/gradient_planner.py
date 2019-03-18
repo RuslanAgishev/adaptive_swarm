@@ -67,7 +67,7 @@ postprocessing       = 0   # show processed data figures after the flight
 max_its              = 120 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
-should_write_movie = 1; movie_file_name = os.getcwd()+'../videos/output.avi'
+should_write_movie = 0; movie_file_name = os.getcwd()+'../videos/output.avi'
 movie_writer = get_movie_writer(should_write_movie, 'Simulation Potential Fields', movie_fps=10., plot_pause_len=0.01)
 
 R_obstacles = 0.1  # [m], size of cylindrical obstacles

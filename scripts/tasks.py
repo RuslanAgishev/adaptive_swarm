@@ -9,10 +9,10 @@ import time
 
 def draw_map(start, goal, obstacles_poses, R_obstacles, f=None, draw_gradients=True, nrows=500, ncols=500):
     if draw_gradients and f is not None:
-        skip = 4
+        skip = 10
         [x_m, y_m] = np.meshgrid(np.linspace(-2.5, 2.5, ncols), np.linspace(-2.5, 2.5, nrows))
         [gy, gx] = np.gradient(-f);
-        Q = plt.quiver(x_m[::skip, ::skip], y_m[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip], scale=100, width=0.002)
+        Q = plt.quiver(x_m[::skip, ::skip], y_m[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip])#, scale=100, width=0.002)
     else:
         plt.grid()
     plt.plot(start[0], start[1], 'ro', color='yellow', markersize=10);
