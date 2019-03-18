@@ -4,6 +4,7 @@ import numpy as np
 from numpy.linalg import norm
 import matplotlib.pyplot as plt
 from matplotlib import collections
+plt.rcParams.update({'font.size': 22})
 from math import *
 import random
 from impedance.impedance_modeles import *
@@ -58,7 +59,7 @@ influence_radius     = 5      # potential fields obstacles influence radius
 human_name           = 'palm' # vicon mocap object
 pos_coef             = 5.0    # scale of the leader's movement relatively to the human operator
 initialized          = False  # is always inits with False: for relative position control
-max_its              = 500 # max number of allowed iters for formation to reach the goal
+max_its              = 20 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
 should_write_movie = 0; movie_file_name = os.getcwd()+'/videos/output.avi'
@@ -68,7 +69,8 @@ R_obstacles = 0.10 # [m]
 R_drones    = 0.05 # [m]
 l           = 0.3 # [m]
 repel_robots = 1
-start = np.array([-1.7, 1.7]); goal = np.array([1.7, -1.7])
+start = np.array([0,0]) #start = np.array([-1.7, 1.7]);
+goal = np.array([1.7, -1.7])
 V0 = (goal - start) / norm(goal-start)    # initial movement direction, |V0| = 1
 U0 = np.array([-V0[1], V0[0]]) / norm(V0) # perpendicular to initial movement direction, |U0|=1
 imp_pose_prev = np.array([0, 0])
@@ -111,7 +113,7 @@ for r in range(num_robots): norm_vels.append([])
 area_array = []
 start_time = time.time()
 
-fig = plt.figure(figsize=(10, 10))
+fig = plt.figure(figsize=(12, 12))
 with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie else get_dummy_context_mgr():
     for i in range(max_its):
         if moving_obstacles: obstacles_poses = move_obstacles(obstacles_poses, obstacles_goal_poses)
@@ -160,7 +162,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
                 if repel_robots:
                     robots_obstacles = [x for i,x in enumerate(robots_poses) if i!=p]
                     obstacles_poses1 = np.array(robots_obstacles + obstacles_poses.tolist())
-                    f = combined_potential(obstacles_poses1, R_obstacles, des_poses[p], influence_radius=2)
+                    f = combined_potential(obstacles_poses1, R_obstacles, des_poses[p], influence_radius=1.8)
                 else:
                     f = combined_potential(obstacles_poses, R_obstacles, des_poses[p], influence_radius=influence_radius)
                 des_poses[p], vels[p] = gradient_planner(f, des_poses[p])
@@ -181,7 +183,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
         plt.cla()
 
         draw_map(start, goal, obstacles_poses, R_obstacles, f, draw_gradients=draw_gradients)
-        draw_robots(des_poses[0], R_drones, routes, num_robots, robots_poses, centroid, vels[0], plot_routes=False)
+        draw_robots(des_poses[0], 5*R_drones, routes, num_robots, robots_poses, centroid, vels[0], plot_routes=False)
         if animate:
             plt.draw()
             plt.pause(0.01)

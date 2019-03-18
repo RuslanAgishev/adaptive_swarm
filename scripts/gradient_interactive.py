@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
 # TODO:
-# 1. local minimum problem (FM2 - algorithm: https://pythonhosted.org/scikit-fmm/)
 # 2. impedance controlled shape of the formation: area(velocity)
 # 3. postprocessing: trajectories smoothness, etc. compare imp modeles:
 #     - oscillation, underdamped, critically damped, overdamped
 #     - velocity plot for all drones, acc, jerk ?
 # 4. another drones are obstacles for each individual drone (done, however attractive and repelling forces should be adjusted)
-# 5. import swarmlib (OOP) and test flight
-# 6. add borders: see image processing (mirrow or black)
+# 6. add borders: see image processing (mirrow or black) for mean velocity calculation
 
 
 import numpy as np
