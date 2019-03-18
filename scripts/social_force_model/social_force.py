@@ -13,14 +13,14 @@ LINECOLOR       = [0,0,0]
 AGENTCOLOR = [0,0,255]
 AGENTSIZE = 9
 AGENTSICKNESS = 3
-nrows = 1000; ncols = 1000
+nrows = 500; ncols = 500
 GRIDSIZE = [nrows, ncols]
-ROBOTSNUMBER = 8
+ROBOTSNUMBER = 10
 
 
 pygame.init()
 screen = pygame.display.set_mode(GRIDSIZE)
-pygame.display.set_caption('Social Force Model - Single-Room Egress')
+pygame.display.set_caption('Social Force Model')
 clock = pygame.time.Clock()
 
 walls = [[0.0, 0.0, 2.0, 0.0],
@@ -89,9 +89,9 @@ while running:
     
 
         # Visualization
-        pygame.draw.circle(screen, AGENTCOLOR, meters2grid(robot.pose), AGENTSIZE, AGENTSICKNESS)
-        pygame.draw.circle(screen, [0,255,0], meters2grid(robot.goal), AGENTSIZE, AGENTSICKNESS)
-        pygame.draw.line(screen, AGENTCOLOR, meters2grid(robot.pose), meters2grid(robot.pose+robot.vel_des), 2)
+        pygame.draw.circle(screen, AGENTCOLOR, meters2grid(robot.pose, nrows, ncols), AGENTSIZE, AGENTSICKNESS)
+        pygame.draw.circle(screen, [0,255,0], meters2grid(robot.goal, nrows, ncols), AGENTSIZE, AGENTSICKNESS)
+        pygame.draw.line(screen, AGENTCOLOR, meters2grid(robot.pose, nrows, ncols), meters2grid(robot.pose+robot.vel_des, nrows, ncols), 2)
 
     pygame.display.flip()
     clock.tick(20)
