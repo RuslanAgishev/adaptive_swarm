@@ -27,8 +27,8 @@ t = np.linspace(0, 4*pi, 101)
 modes = ['underdamped', 'overdamped', 'critically_damped', 'oscillations']
 
 
-plt.rcParams.update({'font.size': 18})
-plt.figure()
+plt.rcParams.update({'font.size': 30})
+plt.figure(figsize=(20,20))
 plt.grid()
 plt.title('Impedance modeles')
 plt.xlabel('t')
@@ -36,7 +36,7 @@ plt.ylabel('x(t)')
 for mode in modes:
 	# differential equation solution
 	sol = odeint(MassSpringDamper, y0, t, args=(M,mode,))
-	plt.plot(t, sol[:, 0], label=mode)
+	plt.plot(t, sol[:, 0], label=mode, linewidth=4)
 	# plt.plot(t, sol[:, 1], 'g', label='omega(t)')
 plt.legend(loc='best')
 	

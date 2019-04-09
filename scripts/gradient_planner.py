@@ -37,24 +37,6 @@ def grid2meters(pose_grid, nrows=500, ncols=500):
     pose_meters = ( np.array(pose_grid) - np.array([ncols/2, nrows/2]) ) / 100.0
     return pose_meters
 
-def map(obstacles_poses, w=2, nrows=500, ncols=500):
-    """ Obstacles map """
-    obstacles_map = np.zeros((nrows, ncols));
-    [x, y] = np.meshgrid(np.arange(ncols), np.arange(nrows))
-    for pose in obstacles_poses:
-        pose = meters2grid(pose)
-        x0 = pose[0]; y0 = pose[1]
-        # cylindrical obstacles
-        t = ((x - x0)**2 + (y - y0)**2) < (100*R_obstacles)**2
-        obstacles_map[t] = 1;
-    # rectangular obstacles
-    obstacles_map[400:, 130:150] = 1;
-    obstacles_map[130:150, :200] = 1;
-    obstacles_map[330:380, 300:] = 1;
-    # borders are obstacles
-    obstacles_map[:,:int(w/2)] = 1; obstacles_map[:,-int(w/2)] = 1
-    obstacles_map[:int(w/2),:] = 1; obstacles_map[-int(w/2):,:] = 1
-    return obstacles_map
 
 def move_obstacles(obstacles_poses, obstacles_goal_poses):
     """ All of the obstacles tend to go to the origin, (0,0) - point """
@@ -65,7 +47,7 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
     """ Each obstacles tends to go to its selected goal point with random speed """
     for p in range(len(obstacles_poses)):
         pose = obstacles_poses[p]; goal = obstacles_goal_poses[p]
-        dx, dy = (goal - pose) / norm(goal-pose) * 0.05 #random.uniform(0,0.05)
+        dx, dy = (goal - pose) / norm(goal-pose) * 0.02 #random.uniform(0,0.05)
         pose[0] += dx;      pose[1] += dy;
 
     return obstacles_poses
@@ -73,25 +55,25 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 
 """ initialization """
 animate              = 1   # show 1-each frame or 0-just final configuration
-random_obstacles     = 1   # randomly distributed obstacles on the map
+random_obstacles     = 0   # randomly distributed obstacles on the map
 num_random_obstacles = 8   # number of random circular obstacles on the map
-num_robots           = 6   # <=4, number of drones in formation
-moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
+num_robots           = 4   # <=4, number of drones in formation
+moving_obstacles     = 1   # 0-static or 1-dynamic obstacles
 impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 impedance_mode       = 'overdamped'    # 'underdamped', 'overdamped', 'critically_damped', 'oscillations'
-formation_gradient   = 0   # followers are attracting to their formation position and repelling from obstacles
-draw_gradients       = 0   # 1-gradients plot, 0-grid
-postprocessing       = 1   # show processed data figures after the flight
+formation_gradient   = 1   # followers are attracting to their formation position and repelling from obstacles
+draw_gradients       = 1   # 1-gradients plot, 0-grid
+postprocessing       = 0   # show processed data figures after the flight
 max_its              = 120 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
-should_write_movie = 0; movie_file_name = os.getcwd()+'/videos/output.avi'
+should_write_movie = 0; movie_file_name = os.getcwd()+'../videos/output.avi'
 movie_writer = get_movie_writer(should_write_movie, 'Simulation Potential Fields', movie_fps=10., plot_pause_len=0.01)
 
 R_obstacles = 0.1  # [m], size of cylindrical obstacles
 R_drones    = 0.05 # [m], size of drones
 l           = 0.3  # [m], swarm interrobots links size
-repel_robots = 1
+repel_robots = 0
 start = np.array([-1.7, 1.7]); goal = np.array([1.7, -1.7])
 V0 = (goal - start) / norm(goal-start)    # initial movement direction, |V0| = 1
 U0 = np.array([-V0[1], V0[0]]) / norm(V0) # perpendicular to initial movement direction, |U0|=1
@@ -103,8 +85,8 @@ if random_obstacles:
     obstacles_poses      = np.random.uniform(low=-2.5, high=2.5, size=(num_random_obstacles,2)) # randomly located obstacles
     obstacles_goal_poses = np.random.uniform(low=-1.3, high=1.3, size=(num_random_obstacles,2)) # randomly located obstacles goal poses
 else:
-    obstacles_poses      = np.array([[-1, 1], [1.0, 0.5], [-1.0, 0.5], [0.1, 0.1], [1, -0.3], [-0.8, -0.8]]) # 2D - coordinates [m]
-    obstacles_goal_poses = np.array([[-0, 0], [0.0, 0.0], [ 0.0, 0.0], [0.0, 0.0], [0,  0], [ 0.0,  0.0]])
+    obstacles_poses      = np.array([[-1, 1], [1.0, 0.5], [-1.0, 0.5], [0.1, 0.1], [1, -0.3], [-0.8, -0.8], [-1,-2]]) # 2D - coordinates [m]
+    obstacles_goal_poses = np.array([[3, -3], [-3, -3],   [ 3, -3],    [-3, 0.0],  [3,  -1],  [ -3,  0.0],  [2, 0]])
 
 
 """ Main loop """
@@ -168,7 +150,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
                     obstacles_poses1 = np.array(robots_obstacles + obstacles_poses.tolist())
                     f = combined_potential(obstacles_poses1, R_obstacles, des_poses[p], influence_radius=2)
                 else:
-                    f = combined_potential(obstacles_poses, R_obstacles, des_poses[p], influence_radius=5)
+                    f = combined_potential(obstacles_poses, R_obstacles, des_poses[p], influence_radius=2)
                 des_poses[p], vels[p] = gradient_planner(f, des_poses[p])
                 norm_vels[p].append(norm(vels[p]))
 
@@ -239,7 +221,7 @@ if postprocessing:
     plt.grid()
     # close windows if Enter-button is pressed
     plt.draw()
-    plt.pause(1)
+    plt.pause(0.1)
     raw_input('Hit Enter to close')
     plt.close('all')
 

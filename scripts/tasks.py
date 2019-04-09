@@ -12,13 +12,13 @@ def draw_map(start, goal, obstacles_poses, R_obstacles, f=None, draw_gradients=T
         skip = 10
         [x_m, y_m] = np.meshgrid(np.linspace(-2.5, 2.5, ncols), np.linspace(-2.5, 2.5, nrows))
         [gy, gx] = np.gradient(-f);
-        Q = plt.quiver(x_m[::skip, ::skip], y_m[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip])
+        Q = plt.quiver(x_m[::skip, ::skip], y_m[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip])#, scale=100, width=0.002)
     else:
         plt.grid()
     plt.plot(start[0], start[1], 'ro', color='yellow', markersize=10);
     plt.plot(goal[0], goal[1], 'ro', color='green', markersize=10);
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.xlabel('X, [m]')
+    plt.ylabel('Y, [m]')
     ax = plt.gca()
     for pose in obstacles_poses:
         circle = plt.Circle(pose, R_obstacles, color='k')
@@ -38,9 +38,10 @@ def draw_robots(current_point1, R_drones, routes=None, num_robots=None, robots_p
         for r in range(1, num_robots):
             plt.plot(routes[r][:,0], routes[r][:,1], '--', color='blue', linewidth=2)
 
-    for pose in robots_poses:
+    for pose in robots_poses[:-1]:
         plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*100, color='blue')
-        # plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*30, color='blue')
+    # plt.plot(robots_poses[-1][0], robots_poses[-1][1], 'ro', markersize=R_drones*100, color='green')
+
     # compute centroid and sort poses by polar angle
     if num_robots<7:
         pp = robots_poses
