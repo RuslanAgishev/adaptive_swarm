@@ -34,7 +34,7 @@ def map(obstacles_poses, R_obstacles, borders_width=2, nrows=500, ncols=500):
     obstacles_map[330:380, 300:] = 1;
     # borders are obstacles
     w = borders_width
-    obstacles_map[:,:int(w/2)] = 1; obstacles_map[:,-int(w/2)] = 1
+    obstacles_map[:,:int(w/2)] = 1; obstacles_map[:,-int(w/2):] = 1
     obstacles_map[:int(w/2),:] = 1; obstacles_map[-int(w/2):,:] = 1
     return obstacles_map
 

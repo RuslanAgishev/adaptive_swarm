@@ -6,8 +6,18 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from potential_fields import gradient_planner, combined_potential
 
-plt.rcParams.update({'font.size': 20})
+# plt.rcParams.update({'font.size': 20})
+SMALL_SIZE = 12
+MEDIUM_SIZE = 16
+BIGGER_SIZE = 26
 
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 def gradient_plot(x,y, gx,gy, skip=10):
     # plt.figure(figsize=(12,8))
@@ -60,15 +70,12 @@ obstacle = np.zeros((nrows, ncols));
 
 # Generate some obstacle
 obstacle [300:, 100:250] = True;
-# obstacle [150:200, 400:500] = True;
-t = ((x - 200)**2 + (y - 50)**2) < 40**2;
+obstacle [150:200, 400:500] = True;
+t = ((x - 200)**2 + (y - 50)**2) < 50**2;
 obstacle[t] = True;
-t = ((x - 400)**2 + (y - 200)**2) < 40**2;
+t = ((x - 400)**2 + (y - 300)**2) < 80**2;
 obstacle[t] = True;
-t = ((x - 50)**2 + (y - 100)**2) < 40**2;
-obstacle[t] = True;
-# plt.imshow(obstacle, 'gray')
-
+plt.imshow(1 - obstacle, 'gray')
 
 # Compute distance transform
 from scipy.ndimage.morphology import distance_transform_edt as bwdist
@@ -146,13 +153,15 @@ route = GradientBasedPlanner(f, start, goal, 700);
 skip = 10;
 xidx = np.arange(0,ncols,skip)
 yidx = np.arange(0,nrows,skip)
-gradient_plot(x,-y, gy,-gx, skip=10)
+# gradient_plot(x,-y, gy,-gx, skip=10)
+gradient_plot(x,y, gy,gx, skip=10)
+
 
 # plt.plot(start[0], start[1], 'ro', markersize=10);
 # plt.plot(goal[0], goal[1], 'ro', color='green', markersize=10);
 # plt.plot(route[:,0], route[:,1], linewidth=3);
-plt.xlabel('X [cm]')
-plt.ylabel('Y [cm]')
+plt.xlabel('X')
+plt.ylabel('Y')
 plt.title('Gradient plot')
 
 plt.draw()
