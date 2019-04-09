@@ -46,7 +46,7 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 animate              = 1   # show 1-each frame or 0-just final configuration
 random_obstacles     = 0   # randomly distributed obstacles on the map
 num_random_obstacles = 8   # number of random circular obstacles on the map
-num_robots           = 4   # <=9, number of drones in formation
+num_robots           = 1   # <=9, number of drones in formation
 moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
 impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 impedance_mode       = 'overdamped'    # 'underdamped', 'overdamped', 'critically_damped', 'oscillations'
@@ -54,11 +54,11 @@ formation_gradient   = 1   # followers are attracting to their formation positio
 draw_gradients       = 1   # 1-gradients plot, 0-grid
 postprocessing       = 0   # show processed data figures after the flight
 """ human guided swarm params """
-influence_radius     = 5      # potential fields obstacles influence radius
+influence_radius     = 2      # potential fields obstacles influence radius
 human_name           = 'palm' # vicon mocap object
 pos_coef             = 5.0    # scale of the leader's movement relatively to the human operator
 initialized          = False  # is always inits with False: for relative position control
-max_its              = 500 # max number of allowed iters for formation to reach the goal
+max_its              = 200 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
 should_write_movie = 0; movie_file_name = os.getcwd()+'/videos/output.avi'

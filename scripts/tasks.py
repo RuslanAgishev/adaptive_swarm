@@ -21,12 +21,12 @@ def draw_map(start, goal, obstacles_poses, R_obstacles, f=None, draw_gradients=T
     plt.ylabel('Y')
     ax = plt.gca()
     for pose in obstacles_poses:
-        circle = plt.Circle(pose, R_obstacles, color='red')
+        circle = plt.Circle(pose, R_obstacles, color='k')
         ax.add_artist(circle)
     # Create a Rectangle patch
-    rect1 = patches.Rectangle((-2.5,-1.15),2.0,0.2,linewidth=1,color='red',fill='True')
-    rect2 = patches.Rectangle((-1.2, 1.4), 0.2,1.0,linewidth=1,color='red',fill='True')
-    rect3 = patches.Rectangle(( 0.4, 0.8), 2.0,0.5,linewidth=1,color='red',fill='True')
+    rect1 = patches.Rectangle((-2.5,-1.15),2.0,0.2,linewidth=1,color='k',fill='True')
+    rect2 = patches.Rectangle((-1.2, 1.4), 0.2,1.0,linewidth=1,color='k',fill='True')
+    rect3 = patches.Rectangle(( 0.4, 0.8), 2.0,0.5,linewidth=1,color='k',fill='True')
     ax.add_patch(rect1)
     ax.add_patch(rect2)
     ax.add_patch(rect3)
@@ -39,8 +39,8 @@ def draw_robots(current_point1, R_drones, routes=None, num_robots=None, robots_p
             plt.plot(routes[r][:,0], routes[r][:,1], '--', color='blue', linewidth=2)
 
     for pose in robots_poses:
-        # plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*300, color='blue')
-        plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*30, color='blue')
+        plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*100, color='blue')
+        # plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*30, color='blue')
     # compute centroid and sort poses by polar angle
     if num_robots<7:
         pp = robots_poses
