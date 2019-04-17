@@ -4,7 +4,7 @@ import numpy as np
 from numpy.linalg import norm
 import time
 import swarmlib
-from swarmlib import Drone
+from swarmlib import Drone, Mocap_object
 import rospy
 import math
 
@@ -67,7 +67,8 @@ def landing():
 class Robot(Drone):
     def __init__(self, name):
         Drone.__init__(self, name)
-        self.route = np.array([self.position()])
+        self.initial_pose = self.position()
+        self.route = np.array([self.initial_pose])
         self.f = 0
         self.leader = False
 
@@ -105,12 +106,12 @@ collision_avoidance = 1
 params = Params()
 
 # joystick
-human = Drone("palm")
+human = Mocap_object("palm")
 
 # drones-followers
-# cf_names = ['cf1', 'cf2', 'cf3']
+cf_names = ['cf1', 'cf2', 'cf3']
 # cf_names = ['cf1', 'cf2']
-cf_names = ['cf2']
+# cf_names = ['cf2']
 
 
 drones = []
@@ -205,7 +206,9 @@ if __name__ == "__main__":
 
         # drones formation:
         if keep_formation and len(drones)>1:
-            drones[1].sp = drones[0].sp + np.array([-0.86*params.l , params.l/2., 0])
+            if len(drones) >= 2: drones[1].sp = drones[0].sp + (drones[1].initial_pose - drones[0].initial_pose)
+            if len(drones) >= 3: drones[2].sp = drones[0].sp + (drones[2].initial_pose - drones[0].initial_pose)
+            # drones[1].sp = drones[0].sp + np.array([-0.86*params.l , params.l/2., 0])
             # drones[2].sp = drones[0].sp + np.array([-0.86*params.l ,-params.l/2., 0])
 
         # correct point to follow with local planner
@@ -235,7 +238,6 @@ if __name__ == "__main__":
         # visualization: matplotlib
         for drone in drones: drone.route = np.vstack( [drone.route, drone.sp] )
         plt.cla()
-
         plt.plot(human.pose[0], human.pose[1], 'ro', label='human pose')
         if collision_avoidance: draw_gradient(drones[0].f)
         draw_map(obstacles_poses, params.R_obstacles)
