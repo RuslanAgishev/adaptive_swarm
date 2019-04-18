@@ -11,7 +11,7 @@ from potential_fields import *
 # for crazyflies
 import crazyflie
 import rospy
-from swarmlib import Drone
+from swarmlib import Drone, Obstacle
 import time
 
 
@@ -44,7 +44,7 @@ def landing():
 class Params:
     def __init__(self):
         self.toFly = 1
-        self.animate = 0 # show RRT construction, set 0 to reduce time of the RRT algorithm
+        self.animate = 1 # show RRT construction, set 0 to reduce time of the RRT algorithm
         self.visualize = 1 # show constructed paths at the end of the RRT and path smoothing algorithms
         self.maxiters = 5000 # max number of samples to build the RRT
         self.goal_prob = 0.05 # with probability goal_prob, sample the goal
@@ -59,7 +59,7 @@ class Params:
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
         self.cf_names = ['cf2']
         self.num_robots = len(self.cf_names)
-        self.TakeoffHeight = 1.0 # [m]
+        self.TakeoffHeight = 0.6 # [m]
 
 class Robot(Drone):
     def __init__(self, name):
@@ -102,28 +102,34 @@ params = Params()
 #             ]
 
 obstacles = [
-              np.array([[-1.0, 2.0], [0.5, 2.0], [0.5, 2.5], [-1.0, 2.5]]), # my table
+              # np.array([[-1.0, 2.0], [0.5, 2.0], [0.5, 2.5], [-1.0, 2.5]]), # my table
               np.array([[-1.0, 2.0], [0.5, 2.0], [0.5, 2.5], [-1.0, 2.5]]) + np.array([2.0, 0]), # Evgeny's table
               np.array([[-2.0, -0.5], [-2.0, 1.0], [-2.5, 1.0], [-2.5, -0.5]]), # Roman's table
               np.array([[-1.2, -1.2], [-1.2, -2.5], [-2.5, -2.5], [-2.5, -1.2]]), # mats
               np.array([[2.0, 0.8], [2.0, -0.8], [2.5, -0.8], [2.5, 0.8]]), # Mocap table
     
               # bugtrap
-              np.array([[0.5, 0], [1.5, 0.], [1.5, 0.3], [0.5, 0.3]]) + np.array([-0.7, -1.5]),
-              np.array([[0.5, 0.3], [0.8, 0.3], [0.8, 1.5], [0.5, 1.5]]) + np.array([-0.7, -1.5]),
-              np.array([[0.5, 1.5], [1.5, 1.5], [1.5, 1.8], [0.5, 1.8]]) + np.array([-0.7, -1.5]),
-              
-]
+              np.array([[0.7, -0.9], [1.3, -0.9], [1.3, -0.8], [0.7, -0.8]]),
+              np.array([[0.7, -0.9], [1.3, -0.9], [1.3, -0.8], [0.7, -0.8]]) + np.array([0.0, 0.5]),
+              np.array([[0.7, -0.9], [0.8, -0.9], [0.8, -0.3], [0.7, -0.3]]),        
+            ]
+
+moving_obstacles_names = ['cf1']
+for name in moving_obstacles_names:
+    obstacle = Obstacle(name)
+    l = 0.20
+    obstacles.append( np.array([obstacle.position()[:2] + [l/2, l/2], obstacle.position()[:2] + [-l/2, l/2], obstacle.position()[:2] + [-l/2, -l/2], obstacle.position()[:2] + [l/2, -l/2]]) )  
+
+
 # Robots initialization
 robots = []
 for name in params.cf_names:
     robot = Robot(name)
-    # robot.sp = robot.position()
     robots.append( robot )
 robot1 = robots[0]; robot1.leader=True
 
 xy_start = robots[0].position()[:2] # np.array([1.2, 1.0])
-xy_goal =  np.array([-1, 1]) # np.array([1.5, -1.4])
+xy_goal =  np.array([-0.5, 0]) # np.array([1.5, -1.4])
 
 # Layered Motion Planning: RRT (global) + Potential Field (local)
 if __name__ == '__main__':
@@ -163,7 +169,7 @@ if __name__ == '__main__':
             # print "takeoff.. ", cf.prefix
             for cf in cf_list:
                 cf.takeoff(targetHeight = params.TakeoffHeight, duration = 3*params.TakeoffHeight)
-        time.sleep(3*params.TakeoffHeight+2.0)
+        time.sleep(3*params.TakeoffHeight+3.0)
 
     while True: # loop through all the setpoint from global planner trajectory, traj_global
         dist_to_goal = norm(robot1.sp[:2] - xy_goal)
@@ -171,10 +177,12 @@ if __name__ == '__main__':
             print 'Goal is reached'
             break
         # obstacles = move_obstacles(obstacles) # change poses of some obstacles on the map
+        obstacles[-1] = np.array([obstacle.position()[:2] + [l/2, l/2], obstacle.position()[:2] + [-l/2, l/2], obstacle.position()[:2] + [-l/2, -l/2], obstacle.position()[:2] + [l/2, -l/2]])
 
         # leader's setpoint from global planner
         robot1.sp_global_planner = np.array(traj_global[sp_ind,:].tolist() + [params.TakeoffHeight])
         # correct leader's pose with local planner
+
         robot1.local_planner(obstacles, params)
 
         """ adding following robots in the swarm """

@@ -16,6 +16,8 @@ def grid_map(obstacles, nrows=500, ncols=500):
     for obstacle in obstacles:
         x1 = meters2grid(obstacle[0][1]); x2 = meters2grid(obstacle[2][1])
         y1 = meters2grid(obstacle[0][0]); y2 = meters2grid(obstacle[2][0])
+        if x1 > x2: tmp = x2; x2 = x1; x1 = tmp
+        if y1 > y2: tmp = y2; y2 = y1; y1 = tmp
         grid[x1:x2, y1:y2] = 1
     return grid
 

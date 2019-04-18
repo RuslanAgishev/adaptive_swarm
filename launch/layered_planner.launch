@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="adaptive_swarm" type="layered_planner.py" name="layered_planner" output="screen">
+  </node>
+
+  <node pkg="crazyflie_demo" type="goto.py" name="goto" output="screen">
+  </node>
+
+
+</launch>
