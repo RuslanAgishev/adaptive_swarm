@@ -41,6 +41,7 @@ def draw_robots(current_point1, R_drones, routes=None, num_robots=None, robots_p
     for pose in robots_poses[:-1]:
         plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*100, color='blue')
     # plt.plot(robots_poses[-1][0], robots_poses[-1][1], 'ro', markersize=R_drones*100, color='green')
+    plt.plot(robots_poses[-1][0], robots_poses[-1][1], 'ro', markersize=R_drones*100, color='blue')
 
     # compute centroid and sort poses by polar angle
     if num_robots<7:
@@ -136,3 +137,16 @@ def formation(num_robots, leader_des, v, l):
     if num_robots==9: return [des2, des3, des4, des5, des6, des7, des8, des9]
     
     return [des2, des3, des4]
+
+def init_fonts():
+    SMALL_SIZE = 12
+    MEDIUM_SIZE = 16
+    BIGGER_SIZE = 26
+
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title

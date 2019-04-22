@@ -153,16 +153,14 @@ route = GradientBasedPlanner(f, start, goal, 700);
 skip = 10;
 xidx = np.arange(0,ncols,skip)
 yidx = np.arange(0,nrows,skip)
-# gradient_plot(x,-y, gy,-gx, skip=10)
 gradient_plot(x,y, gy,gx, skip=10)
-
-
-# plt.plot(start[0], start[1], 'ro', markersize=10);
-# plt.plot(goal[0], goal[1], 'ro', color='green', markersize=10);
-# plt.plot(route[:,0], route[:,1], linewidth=3);
+plt.plot(start[0], start[1], 'ro', color='green', markersize=10, label='Start');
+plt.plot(goal[0], goal[1], 'ro', color='red', markersize=10, label='Goal');
+plt.plot(route[:,0], route[:,1], linewidth=3, label='Path');
 plt.xlabel('X')
 plt.ylabel('Y')
-plt.title('Gradient plot')
+plt.legend(loc='lower right')
+# plt.title('Gradient plot')
 
 plt.draw()
 plt.pause(1)
