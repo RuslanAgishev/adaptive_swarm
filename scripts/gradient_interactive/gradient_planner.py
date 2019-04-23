@@ -54,24 +54,25 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 
 
 """ initialization """
+init_fonts()
 animate              = 1   # show 1-each frame or 0-just final configuration
 random_obstacles     = 0   # randomly distributed obstacles on the map
 num_random_obstacles = 8   # number of random circular obstacles on the map
-num_robots           = 4   # <=4, number of drones in formation
-moving_obstacles     = 1   # 0-static or 1-dynamic obstacles
+num_robots           = 8   # <=4, number of drones in formation
+moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
 impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 impedance_mode       = 'overdamped'    # 'underdamped', 'overdamped', 'critically_damped', 'oscillations'
 formation_gradient   = 1   # followers are attracting to their formation position and repelling from obstacles
-draw_gradients       = 1   # 1-gradients plot, 0-grid
+draw_gradients       = 0   # 1-gradients plot, 0-grid
 postprocessing       = 0   # show processed data figures after the flight
 max_its              = 120 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
-should_write_movie = 0; movie_file_name = os.getcwd()+'../videos/output.avi'
+should_write_movie = 1; movie_file_name = os.getcwd()+'/output.avi'
 movie_writer = get_movie_writer(should_write_movie, 'Simulation Potential Fields', movie_fps=10., plot_pause_len=0.01)
 
 R_obstacles = 0.1  # [m], size of cylindrical obstacles
-R_drones    = 0.05 # [m], size of drones
+R_drones    = 0.1 # [m], size of drones
 l           = 0.3  # [m], swarm interrobots links size
 repel_robots = 0
 start = np.array([-1.7, 1.7]); goal = np.array([1.7, -1.7])
