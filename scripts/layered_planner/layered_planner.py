@@ -48,7 +48,7 @@ def landing():
 
 class Params:
     def __init__(self):
-        self.toFly = 1 # 1 - real drones flight and simulation, 0 - only simulation
+        self.toFly = 0 # 1 - real drones flight and simulation, 0 - only simulation
         self.animate = 0 # show RRT construction, set 0 to reduce time of the RRT algorithm
         self.visualize = 1 # show constructed paths at the end of the RRT and path smoothing algorithms
         self.maxiters = 5000 # max number of samples to build the RRT
