@@ -106,7 +106,7 @@ def gradient_planner_next(current_point, f, params):
     """
     [gy, gx] = np.gradient(-f)
     iy, ix = np.array( meters2grid(current_point), dtype=int )
-    w = 20 # smoothing window size for gradient-velocity
+    w = 25 # smoothing window size for gradient-velocity
     vx = np.mean(gx[ix-int(w/2) : ix+int(w/2), iy-int(w/2) : iy+int(w/2)])
     vy = np.mean(gy[ix-int(w/2) : ix+int(w/2), iy-int(w/2) : iy+int(w/2)])
     dt = 0.01*params.drone_vel / np.linalg.norm([vx, vy])

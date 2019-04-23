@@ -32,7 +32,7 @@ def landing():
     for robot in robots: robot.sp = robot.position()
     while(1):
         for robot in robots:
-            robot.sp[2] -= 0.002
+            robot.sp[2] -= 0.004
             if params.toFly: robot.fly()
             robot.publish_sp()
             robot.publish_path_sp()
@@ -45,6 +45,7 @@ def landing():
                 for cf in cf_list: cf.stop()
             break
 
+
 class Params:
     def __init__(self):
         self.toFly = 1 # 1 - real drones flight and simulation, 0 - only simulation
@@ -56,16 +57,18 @@ class Params:
         self.extension = 0.4 # [m], extension parameter: this controls how far the RRT extends in each step.
         self.world_bounds_x = [-2.5, 2.5] # [m], map size in X-direction
         self.world_bounds_y = [-2.5, 2.5] # [m], map size in Y-direction
-        self.drone_vel = 2.0 # [m/s]
+        self.drone_vel = 3.0 # [m/s]
         self.ViconRate = 100 # [Hz]
-        self.max_sp_dist = 0.4 * self.drone_vel # [m], maximum distance between current robot's pose and the sp from global planner
-        self.influence_radius = 1.22 # potential fields radius, defining repulsive area size near the obstacle
+        self.max_sp_dist = 0.15 * self.drone_vel # [m], maximum distance between current robot's pose and the sp from global planner
+        self.influence_radius = 1.23 # potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
         self.cf_names = ['cf1', 'cf2', 'cf3']
-        # self.cf_names = ['cf3']
+        # self.cf_names = ['cf1', 'cf2']
         self.num_robots = len(self.cf_names)
         self.TakeoffHeight = 0.8 # [m]
         self.length_moving_obstacles = 0.2 # [m], size of Vicon objects: moving cubes, other drones
+        self.reached_goal = 0
+        self.l_drones = 0.3 # [m], distance between the drones in the formation
 
 class Robot(Drone):
     def __init__(self, name):
@@ -149,7 +152,7 @@ for name in params.cf_names:
 robot1 = robots[0]; robot1.leader=True
 
 xy_start = robots[0].position()[:2] # np.array([1.2, 1.0])
-# xy_goal =  np.array([-0.5, 1]) # np.array([1.5, -1.4])
+# xy_goal =  np.array([-1.0, 1]) # np.array([1.5, -1.4])
 xy_goal =  np.array([1.0, -1])
 
 # Layered Motion Planning: RRT (global) + Potential Field (local)
@@ -171,7 +174,7 @@ if __name__ == '__main__':
     robot1.route = np.array([[traj_global[0,0], traj_global[0,1], params.TakeoffHeight]])
     robot1.sp = robot1.route[-1,:]
 
-    followers_sp = formation(params.num_robots, leader_des=robot1.sp[:2], v=np.array([0, -0.3]), l=0.4)
+    followers_sp = formation(params.num_robots, leader_des=robot1.sp[:2], v=np.array([1, 0]), l=params.l_drones)
     for i in range(len(followers_sp)):
         robots[i+1].sp = followers_sp[i].tolist() + [params.TakeoffHeight]
         robots[i+1].route = np.array(robots[i+1].sp)
@@ -192,10 +195,17 @@ if __name__ == '__main__':
                 cf.takeoff(targetHeight = params.TakeoffHeight, duration = 4*params.TakeoffHeight)
         time.sleep(4*params.TakeoffHeight)
 
+    t_goal = -1
     while not rospy.is_shutdown(): # loop through all the setpoint from global planner trajectory, traj_global
         dist_to_goal = norm(robot1.sp[:2] - xy_goal)
-        if dist_to_goal < params.goal_tolerance: # [m]
+        if dist_to_goal < params.goal_tolerance and not params.reached_goal: # [m]
             print 'Goal is reached'
+            t_goal = time.time()
+            params.reached_goal = 1
+        # wait for drones-followers to reach their predefined positions
+        t_current = time.time()
+        if t_current - t_goal > 3.0 and t_goal > 0:
+            print 'Ready to land'
             break
         # obstacles = move_obstacles(obstacles) # change poses of some obstacles on the map
         for i in range( len(moving_obstacles) ):
@@ -210,7 +220,7 @@ if __name__ == '__main__':
         """ adding following robots in the swarm """
         # formation poses from global planner
         direction = normalize(robot1.sp_global_planner[:2]-robot1.sp[:2])
-        followers_sp_global_planner = formation(params.num_robots, robot1.sp_global_planner[:2], v=direction, l=0.4)
+        followers_sp_global_planner = formation(params.num_robots, robot1.sp_global_planner[:2], v=direction, l=params.l_drones)
         for i in range(len(followers_sp_global_planner)):
             robots[i+1].sp_global_planner = followers_sp_global_planner[i].tolist() + [params.TakeoffHeight]
         for p in range(len(followers_sp)): # formation poses correction with local planner
