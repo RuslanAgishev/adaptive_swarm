@@ -32,9 +32,9 @@ class Params:
         self.extension = 0.4 # [m], extension parameter: this controls how far the RRT extends in each step.
         self.world_bounds_x = [-2.5, 2.5] # [m], map size in X-direction
         self.world_bounds_y = [-2.5, 2.5] # [m], map size in Y-direction
-        self.drone_vel = 2.0 # [m/s]
+        self.drone_vel = 5.0 # [m/s]
         self.ViconRate = 100 # [Hz]
-        self.max_sp_dist = 0.5 * self.drone_vel # [m], maximum distance between current robot's pose and the sp from global planner
+        self.max_sp_dist = 0.2 * self.drone_vel # [m], maximum distance between current robot's pose and the sp from global planner
         self.influence_radius = 1.3 # potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
         self.num_robots = 4
