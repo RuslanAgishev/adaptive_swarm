@@ -55,26 +55,26 @@ def move_obstacles(obstacles_poses, obstacles_goal_poses):
 
 """ initialization """
 init_fonts()
-animate              = 1   # show 1-each frame or 0-just final configuration
+animate              = 0   # show 1-each frame or 0-just final configuration
 random_obstacles     = 0   # randomly distributed obstacles on the map
 num_random_obstacles = 8   # number of random circular obstacles on the map
-num_robots           = 8   # <=4, number of drones in formation
-moving_obstacles     = 0   # 0-static or 1-dynamic obstacles
+num_robots           = 4   # <=4, number of drones in formation
+moving_obstacles     = 1   # 0-static or 1-dynamic obstacles
 impedance            = 0   # impedance links between the leader and followers (leader's velocity)
 impedance_mode       = 'overdamped'    # 'underdamped', 'overdamped', 'critically_damped', 'oscillations'
 formation_gradient   = 1   # followers are attracting to their formation position and repelling from obstacles
-draw_gradients       = 0   # 1-gradients plot, 0-grid
-postprocessing       = 0   # show processed data figures after the flight
+draw_gradients       = 1   # 1-gradients plot, 0-grid
+postprocessing       = 1   # show processed data figures after the flight
 max_its              = 120 # max number of allowed iters for formation to reach the goal
 # movie writer
 progress_bar = FillingCirclesBar('Number of Iterations', max=max_its)
-should_write_movie = 1; movie_file_name = os.getcwd()+'/output.avi'
+should_write_movie = 0; movie_file_name = os.getcwd()+'/output.avi'
 movie_writer = get_movie_writer(should_write_movie, 'Simulation Potential Fields', movie_fps=10., plot_pause_len=0.01)
 
 R_obstacles = 0.1  # [m], size of cylindrical obstacles
 R_drones    = 0.1 # [m], size of drones
 l           = 0.3  # [m], swarm interrobots links size
-repel_robots = 0
+repel_robots = 1
 start = np.array([-1.7, 1.7]); goal = np.array([1.7, -1.7])
 V0 = (goal - start) / norm(goal-start)    # initial movement direction, |V0| = 1
 U0 = np.array([-V0[1], V0[0]]) / norm(V0) # perpendicular to initial movement direction, |U0|=1
@@ -88,10 +88,8 @@ if random_obstacles:
 else:
     obstacles_poses      = np.array([[-1, 1], [1.0, 0.5], [-1.0, 0.5], [0.1, 0.1], [1, -0.3], [-0.8, -0.8], [-1,-2]]) # 2D - coordinates [m]
     obstacles_goal_poses = np.array([[3, -3], [-3, -3],   [ 3, -3],    [-3, 0.0],  [3,  -1],  [ -3,  0.0],  [2, 0]])
-
-
+    
 """ Main loop """
-
 # drones polygonal formation
 route1 = start # leader
 current_point1 = start
@@ -106,11 +104,14 @@ for r in range(num_robots): norm_vels.append([])
 
 # variables for postprocessing and performance estimation
 area_array = []
-start_time = time.time()
 
 fig = plt.figure(figsize=(10, 10))
 with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie else get_dummy_context_mgr():
+    start_time = time.time()
+    t_array = []
     for i in range(max_its):
+        t = time.time()
+        t_array.append(t-start_time)
         if moving_obstacles: obstacles_poses = move_obstacles(obstacles_poses, obstacles_goal_poses)
 
         """ Leader's pose update """
@@ -149,7 +150,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
                 if repel_robots:
                     robots_obstacles = [x for i,x in enumerate(robots_poses) if i!=p]
                     obstacles_poses1 = np.array(robots_obstacles + obstacles_poses.tolist())
-                    f = combined_potential(obstacles_poses1, R_obstacles, des_poses[p], influence_radius=2)
+                    f = combined_potential(obstacles_poses1, R_obstacles, des_poses[p], influence_radius=1.2)
                 else:
                     f = combined_potential(obstacles_poses, R_obstacles, des_poses[p], influence_radius=2)
                 des_poses[p], vels[p] = gradient_planner(f, des_poses[p])
@@ -172,7 +173,7 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
         plt.cla()
 
         draw_map(start, goal, obstacles_poses, R_obstacles, f1, draw_gradients=draw_gradients)
-        draw_robots(current_point1, R_drones, routes, num_robots, robots_poses, centroid, vels[0])
+        draw_robots(current_point1, R_drones, routes, num_robots, robots_poses, centroid, vels[0], plot_routes=1)
         if animate:
             plt.draw()
             plt.pause(0.01)
@@ -188,21 +189,22 @@ with movie_writer.saving(fig, movie_file_name, max_its) if should_write_movie el
 
 """ Flight data postprocessing """
 if postprocessing:
-    plt.figure()
+    plt.figure(figsize=(10,10))
     plt.title("Drones trajectories")
     plt.plot(centroid_route[:,0], centroid_route[:,1], label='centroid')
     d = 0
     for route in routes:
         d += 1
-        plt.plot(route[:,0], route[:,1], '--', label='drone %d' %d)
+        plt.plot(route[:,0], route[:,1], '--', label='drone %d' %d, linewidth=2)
     plt.legend()
     plt.grid()
 
-    plt.figure()
-    plt.title("Average velocity, <V>= %s m/s" %round(np.mean(np.array(norm_vels[0])), 2))
-    for r in range(num_robots):
-        plt.plot(norm_vels[r], label='drone %d' %(r+1))
-    plt.xlabel('time')
+    plt.figure(figsize=(10,6))
+    plt.title("Average velocity, $<V>= %s m/s$" %round(np.mean(np.array(norm_vels[0])), 2))
+    plt.plot(t_array, norm_vels[0], '-', label='drone 1', linewidth=2)
+    for r in range(1, num_robots):
+        plt.plot(t_array, norm_vels[r], '--', label='drone %d' %(r+1), linewidth=2)
+    plt.xlabel('Time, [s]')
     plt.ylabel('velocity, [m/s]')
     plt.legend()
     plt.grid()
@@ -213,13 +215,16 @@ if postprocessing:
             X = np.append( X, routes[r][i,0] )
             Y = np.append( Y, routes[r][i,1] )
         area_array.append(poly_area(X,Y))
-
-    plt.figure()
+    area_array = area_array[1:]
+    S0 = area_array[0] # default inter-robots distance
+    plt.figure(figsize=(10,6))
     plt.title("Area of robots' formation")
-    plt.plot(area_array)
-    plt.xlabel('time')
+    plt.plot(t_array, area_array, 'k', label='Formation area', linewidth=2)
+    plt.plot(t_array, S0*np.ones_like(t_array), '--', label='Default area', linewidth=2)
+    plt.xlabel('Time, [s]')
     plt.ylabel('Formation area, [m^2]')
     plt.grid()
+    plt.legend()
     # close windows if Enter-button is pressed
     plt.draw()
     plt.pause(0.1)
