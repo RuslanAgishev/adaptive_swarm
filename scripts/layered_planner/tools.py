@@ -97,3 +97,8 @@ def poses2polygons(poses, l=0.1):
         polygon = np.array([pose + [-l/2,-l/2], pose + [l/2,-l/2], pose + [l/2,l/2], pose + [-l/2,l/2]])
         polygons.append(polygon)
     return polygons
+
+def poly_area(x,y):
+    # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
+    # https://en.wikipedia.org/wiki/Shoelace_formula
+    return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))

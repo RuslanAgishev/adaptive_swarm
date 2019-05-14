@@ -39,9 +39,9 @@ def draw_robots(current_point1, R_drones, routes=None, num_robots=None, robots_p
             plt.plot(routes[r][:,0], routes[r][:,1], '--', color='blue', linewidth=2)
 
     for pose in robots_poses[:-1]:
-        plt.plot(pose[0], pose[1], 'ro', markersize=R_drones*100, color='blue')
-    # plt.plot(robots_poses[-1][0], robots_poses[-1][1], 'ro', markersize=R_drones*100, color='green')
-    plt.plot(robots_poses[-1][0], robots_poses[-1][1], 'ro', markersize=R_drones*100, color='blue')
+        plt.plot(pose[0], pose[1], '^', markersize=R_drones*100, color='blue')
+    plt.plot(robots_poses[-1][0], robots_poses[-1][1], '^', markersize=R_drones*100, color='green')
+    # plt.plot(robots_poses[-1][0], robots_poses[-1][1], '^', markersize=R_drones*100, color='blue')
 
     # compute centroid and sort poses by polar angle
     if num_robots<7:
@@ -116,6 +116,7 @@ def formation(num_robots, leader_des, v, l):
     geometry of the swarm: following robots desired locations
     relatively to the leader
     """
+    v = v / norm(v)
     u = np.array([-v[1], v[0]])
     """ followers positions """
     des2 = leader_des - v*l*sqrt(3)/2 + u*l/2
