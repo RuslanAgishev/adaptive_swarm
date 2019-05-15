@@ -22,7 +22,7 @@ def draw_map(obstacles):
     ax.set_xlim(world_bounds_x)
     ax.set_ylim(world_bounds_y)
     for k in range(len(obstacles)):
-        ax.add_patch( Polygon(obstacles[k], color='k') )
+        ax.add_patch( Polygon(obstacles[k], color='k', zorder=10) )
 
 
 def draw_gradient(f, nrows=500, ncols=500):
@@ -102,3 +102,11 @@ def poly_area(x,y):
     # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
     # https://en.wikipedia.org/wiki/Shoelace_formula
     return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
+
+def path_length(pose_array):
+    length = 0
+    for i in range( 1,len(pose_array) ):
+        dl = np.linalg.norm(pose_array[i,:]-pose_array[i-1,:])
+        # if dl > 0.01 and dl < 0.2: length += dl
+        length += dl
+    return length
