@@ -54,8 +54,8 @@ def combined_potential(obstacles_grid, goal, influence_radius=2, attractive_coef
     xi = attractive_coef
     attractive = xi * ( (x - goal[0])**2 + (y - goal[1])**2 )
     """ Combine terms """
-    f = attractive + repulsive
-    return f
+    total = attractive + repulsive
+    return total, attractive, repulsive
 
 
 def gradient_planner (f, start, goal, maxiters=200):

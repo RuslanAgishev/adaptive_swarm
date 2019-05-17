@@ -31,6 +31,13 @@ def draw_gradient(f, nrows=500, ncols=500):
     [gy, gx] = np.gradient(-f);
     Q = plt.quiver(x_m[::skip, ::skip], y_m[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip])
 
+def draw_sphere(pose, R=10):
+    u = np.linspace(0, 2*np.pi, 100)
+    v = np.linspace(0, np.pi, 100)
+    x = R * np.outer(np.cos(u), np.sin(v)) + pose[0]
+    y = R * np.outer(np.sin(u), np.sin(v)) + pose[1]
+    z = R * np.outer(np.ones(np.size(u)), np.cos(v)) + pose[2]
+    ax.plot_surface(x, y, z, rstride=4, cstride=4, color='yellow')
 
 def waypts2setpts(P, params):
 	"""

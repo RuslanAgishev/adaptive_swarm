@@ -87,13 +87,12 @@ nu = 800
 repulsive = nu*((1./d2 - 1./d0)**2)
 repulsive [d2 > d0] = 0
 
-# # Display repulsive potential
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-# plt.title ('Repulsive Potential')
-
-# # Plot the surface.
-# surf = ax.plot_surface(x, y, repulsive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+# Display repulsive potential
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+plt.title ('Repulsive Potential')
+# Plot the surface.
+surf = ax.plot_surface(x, y, repulsive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
 # # Compute attractive force
 goal = [400, 50];
@@ -103,11 +102,11 @@ xi = 1./700
 
 attractive = xi * ( (x - goal[0])**2 + (y - goal[1])**2 );
 
-# # Display attractive potential
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-# ax.plot_surface(x, y, attractive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-# plt.title ('Attractive Potential')
+# Display attractive potential
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot_surface(x, y, attractive, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+plt.title ('Attractive Potential')
 
 # # Combine terms
 f = attractive + repulsive
