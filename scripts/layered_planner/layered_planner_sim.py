@@ -47,7 +47,8 @@ class Params:
         self.max_sp_dist = 0.1 * self.drone_vel * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
 class Robot:
-    def __init__(self):
+    def __init__(self, id):
+        self.id = id
         self.sp = np.array([0, 0])
         self.sp_global = np.array([0,0])
         self.route = np.array([self.sp])
@@ -86,16 +87,17 @@ def visualize2D():
     for robot in robots: robots_poses.append(robot.sp)
     robots_poses.sort(key=lambda p: atan2(p[1]-centroid[1],p[0]-centroid[0]))
     plt.gca().add_patch( Polygon(robots_poses, color='yellow') )
-    plt.plot(centroid[0], centroid[1], '*', color='b', markersize=10)
-    plt.plot(robot1.route[:,0], robot1.route[:,1], linewidth=2, color='green', label="Robot's path, corrected with local planner", zorder=10)
+    plt.plot(centroid[0], centroid[1], '*', color='b', markersize=10, label='Centroid position')
+    plt.plot(robot1.route[:,0], robot1.route[:,1], linewidth=2, color='green', label="Leader's path", zorder=10)
     # for robot in robots[1:]: plt.plot(robot.route[:,0], robot.route[:,1], '--', linewidth=2, color='green', zorder=10)
-    # plt.plot(P[:,0], P[:,1], linewidth=3, color='orange', label='Global planner path')
-    plt.plot(traj_global[sp_ind,0], traj_global[sp_ind,1], 'ro', color='blue', markersize=7, label='Global planner setpoint')
+    plt.plot(P[:,0], P[:,1], linewidth=3, color='orange', label='Global planner path')
+    # plt.plot(traj_global[sp_ind,0], traj_global[sp_ind,1], 'ro', color='blue', markersize=7, label='Global planner setpoint')
     plt.plot(xy_start[0],xy_start[1],'bo',color='red', markersize=20, label='start')
     plt.plot(xy_goal[0], xy_goal[1],'bo',color='green', markersize=20, label='goal')
     plt.legend()
 
 # Initialization
+init_fonts(small=12, medium=16, big=26)
 params = Params()
 xy_start = np.array([1.2, 1.0])
 xy_goal =  np.array([1.5, -1.4])
@@ -111,10 +113,10 @@ obstacles = [
               np.array([[-2, -2], [-0.5, -2], [-0.5, -1.8], [-2, -1.8]]),
               np.array([[-0.7, -1.8], [-0.5, -1.8], [-0.5, -0.8], [-0.7, -0.8]]),
               # walls
-              # np.array([[-2.5, -2.5], [2.5, -2.5], [2.5, -2.47], [-2.5, -2.47]]),
+              np.array([[-2.5, -2.5], [2.5, -2.5], [2.5, -2.47], [-2.5, -2.47]]), # comment this for better 3D visualization
               np.array([[-2.5, 2.47], [2.5, 2.47], [2.5, 2.5], [-2.5, 2.5]]),
               np.array([[-2.5, -2.47], [-2.47, -2.47], [-2.47, 2.47], [-2.5, 2.47]]),
-              # np.array([[2.47, -2.47], [2.5, -2.47], [2.5, 2.47], [2.47, 2.47]]),
+              np.array([[2.47, -2.47], [2.5, -2.47], [2.5, 2.47], [2.47, 2.47]]), # comment this for better 3D visualization
 
               # moving obstacle
               np.array([[-2.3, 2.0], [-2.2, 2.0], [-2.2, 2.1], [-2.3, 2.1]]),
@@ -125,7 +127,7 @@ obstacles = [
 
 robots = []
 for i in range(params.num_robots):
-    robots.append(Robot())
+    robots.append(Robot(i+1))
 robot1 = robots[0]; robot1.leader=True
 
 
@@ -230,19 +232,22 @@ if params.postprocessing:
     print "Time to reach goal: %.2f [s]" %metrics.t_reach_goal
 
     plt.figure(figsize=(10,10))
-    plt.title(("Drones trajectories. Centroid path: %.2f [m]" %metrics.centroid_path_length))
+    print "\nCentroid path: %.2f [m]" %metrics.centroid_path_length
+    plt.title("Drones trajectories.")
     d = 0
     for robot in robots:
         d += 1
         plt.plot(robot.route[:,0], robot.route[:,1], '--', label='drone %d' %d, linewidth=2)
-    plt.plot(metrics.centroid_path[:,0], metrics.centroid_path[:,1], linewidth=2, label='centroid', color='k')
+    plt.plot(metrics.centroid_path[:,0], metrics.centroid_path[:,1], linewidth=3, label='centroid', color='k')
     plt.legend()
     plt.grid()
 
-    plt.figure(figsize=(10,12))
-    plt.subplot(2,1,1)
-    plt.title( "Leader Average Velocity: %.2f" %np.mean(np.array(robot1.vel_array)) )
-    plt.plot( t_array, robot1.vel_array, '-', label='drone 1', linewidth=2)
+    plt.figure(figsize=(10,6))
+    # plt.subplot(2,1,1)
+    plt.title( "Robots Velocities" )
+    print "\n"
+    for robot in robots: print "Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) )
+    plt.plot( t_array, robot1.vel_array, '-', color='k', label='drone 1', linewidth=3)
     for r in range(1, params.num_robots):
         plt.plot(t_array, robots[r].vel_array, '--', label='drone %d' %(r+1), linewidth=2)
     plt.xlabel('Time, [s]')
@@ -251,21 +256,30 @@ if params.postprocessing:
     plt.grid()
 
     area_array = []
-    for i in range(len(robot1.route)):
-        X = np.array([]); Y = np.array([])
-        for robot in robots:
-            X = np.append( X, robot.route[i,0] )
-            Y = np.append( Y, robot.route[i,1] )
+    for i in range(len(robot1.route)-1):
+        X = np.array([]); Y = np.array([]); robots_poses = []
+        for robot in robots: robots_poses.append(robot.route[i,:])
+        robots_poses.sort(key=lambda p: atan2(p[1]-metrics.centroid_path[i,1], p[0]-metrics.centroid_path[i,0]))
+        for pose in robots_poses:
+            X = np.append( X, pose[0] )
+            Y = np.append( Y, pose[1] )
         area_array.append(poly_area(X,Y))
     area_array = area_array[1:]
     # default formation area
     if params.num_robots==3: S0 = 0.5*sqrt(3)/2.*params.interrobots_dist**2
     elif params.num_robots==4: S0 = sqrt(3)/2.*params.interrobots_dist**2
     else: S0 = area_array[0]
-    plt.subplot(2,1,2)
+
+    plt.figure(figsize=(10,6))
+    # plt.subplot(2,1,2)
+    Smean = np.mean( area_array )
+    print "\nMin formation area: %.2f [m^2]" %np.min( area_array )
+    print "Mean formation area: %.2f [m^2]" %Smean
+    print "Max formation area: %.2f [m^2]" %np.max( area_array )
     plt.title("Area of robots' formation")
-    plt.plot(t_array, area_array, 'k', label='Formation area', linewidth=2)
+    plt.plot(t_array[:-1], area_array, 'k', label='Formation area', linewidth=2)
     plt.plot(t_array, S0*np.ones_like(t_array), '--', label='Default area', linewidth=2)
+    plt.plot(t_array, Smean*np.ones_like(t_array), '--', color='r', label='Mean area', linewidth=2)
     plt.xlabel('Time, [s]')
     plt.ylabel('Formation area, [m^2]')
     plt.grid()

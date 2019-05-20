@@ -39,6 +39,19 @@ def draw_sphere(pose, R=10):
     z = R * np.outer(np.ones(np.size(u)), np.cos(v)) + pose[2]
     ax.plot_surface(x, y, z, rstride=4, cstride=4, color='yellow')
 
+def init_fonts(small=12, medium=16, big=26):
+    SMALL_SIZE = small
+    MEDIUM_SIZE = medium
+    BIGGER_SIZE = big
+
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 def waypts2setpts(P, params):
 	"""
 	construct a long array of setpoints, traj_global, with equal inter-distances, dx,
