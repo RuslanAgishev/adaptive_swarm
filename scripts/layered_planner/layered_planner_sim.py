@@ -246,7 +246,9 @@ if params.postprocessing:
     # plt.subplot(2,1,1)
     plt.title( "Robots Velocities" )
     print "\n"
-    for robot in robots: print "Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) )
+    for robot in robots:
+        print "Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) )
+        print "Robot %d Max Velocity: %.2f [m/s]" %( robot.id, np.max(np.array(robot.vel_array)) )
     plt.plot( t_array, robot1.vel_array, '-', color='k', label='drone 1', linewidth=3)
     for r in range(1, params.num_robots):
         plt.plot(t_array, robots[r].vel_array, '--', label='drone %d' %(r+1), linewidth=2)
