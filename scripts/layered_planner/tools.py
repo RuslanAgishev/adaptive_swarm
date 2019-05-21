@@ -6,8 +6,9 @@ from math import *
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import Polygon
+import xlwt
+import time
 
-# ### Helper functions
 
 def draw_map(obstacles):
     # Obstacles. An obstacle is represented as a convex hull of a number of points. 
@@ -130,3 +131,31 @@ def path_length(pose_array):
         # if dl > 0.01 and dl < 0.2: length += dl
         length += dl
     return length
+
+def save_data(metrics):
+    #style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on', num_format_str='#,##0.00')
+    #style1 = xlwt.easyxf(num_format_str='D-MMM-YY')
+
+    wb = xlwt.Workbook()
+    ws = wb.add_sheet('Metrics')
+
+    ws.write(0, 0, 'T_reach goal'); ws.write(0, 1, metrics.t_reach_goal)
+    ws.write(1, 0, 'Robots_path_lengths')
+    for i in range(len(metrics.robots_path_lengths)):
+        ws.write(1, i+1, metrics.robots_path_lengths[i])
+    ws.write(2, 0, 'Centroid_path_length'); ws.write(2, 1, metrics.centroid_path_length)
+
+    ws.write(3, 0, 'Average vels')
+    for i in range(len(metrics.vels_mean)):
+        ws.write(3, i+1, metrics.vels_mean[i])
+    ws.write(4, 0, 'Max vels')
+    for i in range(len(metrics.vels_max)):
+        ws.write(4, i+1, metrics.vels_max[i])
+    ws.write(5, 0, 'S_min'); ws.write(5, 1, metrics.S_min)
+    ws.write(6, 0, 'S_default'); ws.write(6, 1, metrics.S0)
+    ws.write(7, 0, 'S_mean'); ws.write(7, 1, metrics.S_mean)
+    ws.write(8, 0, 'S_max'); ws.write(8, 1, metrics.S_max)
+
+    ws.write(9,0, 'R_formation_mean'); ws.write(9,1, metrics.R_formation_mean)
+
+    wb.save(metrics.folder_to_save+'output_%f.xls'%time.time())

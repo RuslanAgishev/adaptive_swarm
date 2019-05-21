@@ -100,8 +100,8 @@ def visualize2D():
 init_fonts(small=12, medium=16, big=26)
 params = Params()
 xy_start = np.array([1.2, 1.0])
-xy_goal =  np.array([1.5, -1.4])
-# xy_goal =  np.array([1.3, 1.0])
+# xy_goal =  np.array([1.5, -1.4])
+xy_goal =  np.array([1.3, 1.0])
 
 # Obstacles map construction
 obstacles = [
@@ -138,6 +138,11 @@ class Metrics:
         self.max_dists_array = []
         self.centroid_path = [np.array([0,0])]
         self.centroid_path_length = 0
+        self.robots_path_lengths = []
+        self.vels_mean = []
+        self.vels_max = []
+
+        self.folder_to_save = '/home/ruslan/Desktop/'
 
 metrics = Metrics()
 
@@ -170,6 +175,7 @@ if __name__ == '__main__':
 
     while True: # loop through all the setpoint from global planner trajectory, traj_global
         t_array.append( time.time() - t0 )
+        # print "Current time [sec]: ", time.time() - t0
         dist_to_goal = norm(robot1.sp - xy_goal)
         if dist_to_goal < params.goal_tolerance: # [m]
             print 'Goal is reached'
@@ -202,8 +208,9 @@ if __name__ == '__main__':
         dists = []
         for robot in robots:
             dists.append( norm(centroid-robot.sp) )
-        metrics.mean_dists_array.append(np.mean(dists))
-        metrics.max_dists_array.append(np.max(dists))
+        # Formation size estimation
+        metrics.mean_dists_array.append(np.mean(dists)) # Formation mean Radius
+        metrics.max_dists_array.append(np.max(dists)) # Formation max Radius
 
 
         # visualization
@@ -223,11 +230,11 @@ if params.postprocessing:
     t_array = t_array[1:]
     metrics.centroid_path = metrics.centroid_path[1:,:]
     metrics.centroid_path_length = path_length(metrics.centroid_path)
-    i = 0
+    
     for robot in robots:
-        i += 1
         robot.path_length = path_length(robot.route)
-        print "Robot %d path length: %.2f [m]" %(i, robot.path_length)
+        print "Robot %d path length: %.2f [m]" %(robot.id, robot.path_length)
+        metrics.robots_path_lengths.append( robot.path_length )
     metrics.t_reach_goal = t_array[-1]
     print "Time to reach goal: %.2f [s]" %metrics.t_reach_goal
 
@@ -249,6 +256,8 @@ if params.postprocessing:
     for robot in robots:
         print "Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) )
         print "Robot %d Max Velocity: %.2f [m/s]" %( robot.id, np.max(np.array(robot.vel_array)) )
+        metrics.vels_mean.append( np.mean(np.array(robot.vel_array)) )
+        metrics.vels_max.append( np.max(np.array(robot.vel_array)) )
     plt.plot( t_array, robot1.vel_array, '-', color='k', label='drone 1', linewidth=3)
     for r in range(1, params.num_robots):
         plt.plot(t_array, robots[r].vel_array, '--', label='drone %d' %(r+1), linewidth=2)
@@ -275,10 +284,10 @@ if params.postprocessing:
     plt.figure(figsize=(10,6))
     # plt.subplot(2,1,2)
     Smean = np.mean( area_array )
-    print "\nMin formation area: %f [m^2]" %np.min( area_array )
-    print "Default formation area: %f [m^2]" %S0
-    print "Mean formation area: %f [m^2]" %Smean
-    print "Max formation area: %f [m^2]" %np.max( area_array )
+    print "\nMin formation area: %.2f [m^2]" %np.min( area_array ); metrics.S_min = np.min( area_array )
+    print "Default formation area: %f [m^2]" %S0;                   metrics.S_default = S0
+    print "Mean formation area: %.2f [m^2]" %Smean;                 metrics.S_mean = np.mean( area_array )
+    print "Max formation area: %.2f [m^2]" %np.max( area_array );   metrics.S_max = np.max( area_array )
     plt.title("Area of robots' formation")
     plt.plot(t_array[:-1], area_array, 'k', label='Formation area', linewidth=2)
     plt.plot(t_array, S0*np.ones_like(t_array), '--', label='Default area', linewidth=2)
@@ -288,14 +297,14 @@ if params.postprocessing:
     plt.grid()
     plt.legend()
 
-    plt.figure()
-    plt.plot(t_array, metrics.mean_dists_array, label='Mean inter-robots distance')
-    plt.plot(t_array, metrics.max_dists_array, label='Max inter-robots distance')
+    plt.figure(figsize=(10,6))
+    plt.plot(t_array, metrics.mean_dists_array, label='Mean inter-robots distance', color='r')
+    plt.plot(t_array, metrics.max_dists_array, label='Max inter-robots distance', color='k')
     plt.grid()
     plt.xlabel('Time, [s]')
     plt.ylabel('Distance, [m]')
     plt.legend()
-    plt.grid()
+    metrics.R_formation_mean = np.mean( metrics.max_dists_array )
 
     fig = plt.figure(figsize=(10,10))
     ax = fig.gca(projection='3d')
@@ -319,6 +328,8 @@ if params.postprocessing:
     ax.set_ylabel('Y, [cm]')
     ax.set_zlabel('Z, [cm]')
     ax.set_zlim([0, 400])
+
+    save_data(metrics)
 
 # close windows if Enter-button is pressed
 plt.draw()
