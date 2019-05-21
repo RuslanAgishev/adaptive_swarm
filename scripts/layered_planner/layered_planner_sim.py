@@ -42,7 +42,7 @@ class Params:
         self.ViconRate = 100 # [Hz]
         self.influence_radius = 1.4 # potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
-        self.num_robots = 8 # number of robots in the formation
+        self.num_robots = 4 # number of robots in the formation
         self.interrobots_dist = 0.3 # [m], distance between robots in default formation
         self.max_sp_dist = 0.15 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
@@ -100,8 +100,8 @@ def visualize2D():
 init_fonts(small=12, medium=16, big=26)
 params = Params()
 xy_start = np.array([1.2, 1.0])
-# xy_goal =  np.array([1.5, -1.4])
-xy_goal =  np.array([1.3, 1.0])
+xy_goal =  np.array([1.5, -1.4])
+# xy_goal =  np.array([1.3, 1.0])
 
 # Obstacles map construction
 obstacles = [
@@ -138,11 +138,11 @@ class Metrics:
         self.max_dists_array = []
         self.centroid_path = [np.array([0,0])]
         self.centroid_path_length = 0
-        self.robots_path_lengths = []
+        self.robots = []
         self.vels_mean = []
         self.vels_max = []
 
-        self.folder_to_save = '/home/ruslan/Desktop/'
+        self.folder_to_save = '/home/rus/Desktop/'
 
 metrics = Metrics()
 
@@ -225,6 +225,18 @@ if __name__ == '__main__':
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 """ Flight data postprocessing """
 if params.postprocessing:
     t_array = t_array[1:]
@@ -234,17 +246,14 @@ if params.postprocessing:
     for robot in robots:
         robot.path_length = path_length(robot.route)
         print "Robot %d path length: %.2f [m]" %(robot.id, robot.path_length)
-        metrics.robots_path_lengths.append( robot.path_length )
     metrics.t_reach_goal = t_array[-1]
     print "Time to reach goal: %.2f [s]" %metrics.t_reach_goal
 
     plt.figure(figsize=(10,10))
     print "\nCentroid path: %.2f [m]" %metrics.centroid_path_length
     plt.title("Drones trajectories.")
-    d = 0
     for robot in robots:
-        d += 1
-        plt.plot(robot.route[:,0], robot.route[:,1], '--', label='drone %d' %d, linewidth=2)
+        plt.plot(robot.route[:,0], robot.route[:,1], '--', label='drone %d' %robot.id, linewidth=2)
     plt.plot(metrics.centroid_path[:,0], metrics.centroid_path[:,1], linewidth=3, label='centroid', color='k')
     plt.legend()
     plt.grid()
@@ -258,6 +267,7 @@ if params.postprocessing:
         print "Robot %d Max Velocity: %.2f [m/s]" %( robot.id, np.max(np.array(robot.vel_array)) )
         metrics.vels_mean.append( np.mean(np.array(robot.vel_array)) )
         metrics.vels_max.append( np.max(np.array(robot.vel_array)) )
+        metrics.robots.append( robot )
     plt.plot( t_array, robot1.vel_array, '-', color='k', label='drone 1', linewidth=3)
     for r in range(1, params.num_robots):
         plt.plot(t_array, robots[r].vel_array, '--', label='drone %d' %(r+1), linewidth=2)

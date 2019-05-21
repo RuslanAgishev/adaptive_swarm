@@ -8,6 +8,7 @@ import matplotlib.patches as patches
 from matplotlib.patches import Polygon
 import xlwt
 import time
+import os
 
 
 def draw_map(obstacles):
@@ -132,7 +133,7 @@ def path_length(pose_array):
         length += dl
     return length
 
-def save_data(metrics):
+def save_data(metrics, folder_name='output_%f'%time.time()):
     #style0 = xlwt.easyxf('font: name Times New Roman, color-index red, bold on', num_format_str='#,##0.00')
     #style1 = xlwt.easyxf(num_format_str='D-MMM-YY')
 
@@ -141,8 +142,8 @@ def save_data(metrics):
 
     ws.write(0, 0, 'T_reach goal'); ws.write(0, 1, metrics.t_reach_goal)
     ws.write(1, 0, 'Robots_path_lengths')
-    for i in range(len(metrics.robots_path_lengths)):
-        ws.write(1, i+1, metrics.robots_path_lengths[i])
+    for i in range(len(metrics.robots)):
+        ws.write(1, i+1, metrics.robots[i].path_length)
     ws.write(2, 0, 'Centroid_path_length'); ws.write(2, 1, metrics.centroid_path_length)
 
     ws.write(3, 0, 'Average vels')
@@ -152,10 +153,29 @@ def save_data(metrics):
     for i in range(len(metrics.vels_max)):
         ws.write(4, i+1, metrics.vels_max[i])
     ws.write(5, 0, 'S_min'); ws.write(5, 1, metrics.S_min)
-    ws.write(6, 0, 'S_default'); ws.write(6, 1, metrics.S0)
+    ws.write(6, 0, 'S_default'); ws.write(6, 1, metrics.S_default)
     ws.write(7, 0, 'S_mean'); ws.write(7, 1, metrics.S_mean)
     ws.write(8, 0, 'S_max'); ws.write(8, 1, metrics.S_max)
 
     ws.write(9,0, 'R_formation_mean'); ws.write(9,1, metrics.R_formation_mean)
 
-    wb.save(metrics.folder_to_save+'output_%f.xls'%time.time())
+    os.mkdir(metrics.folder_to_save+folder_name)
+    wb.save(metrics.folder_to_save+folder_name+'/results.xls')
+
+    r = 0
+    for robot in metrics.robots:
+        r+=1
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('Trajectories')
+
+        ws.write(0,0, 'X [m]'); ws.write(0,1, 'Y [m]')
+        for i in range(robot.route.shape[0]):
+            x, y = robot.route[i,:]
+            ws.write(i+1,0, x); ws.write(i+1,1, y)
+
+        ws.write(0,3, 'V [m/s]')
+        for i in range(len(robot.vel_array)):
+            v = robot.vel_array[i]
+            ws.write(i+1, 3, v)
+
+        wb.save( metrics.folder_to_save+folder_name+'/robot%d.xls'%r  )
