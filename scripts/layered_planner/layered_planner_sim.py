@@ -22,7 +22,7 @@ from matplotlib import cm
 
 def move_obstacles(obstacles, params):
     # small cubes movement
-    obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
+    # obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
     obstacles[-2] += np.array([-0.003, 0.003]) * params.drone_vel
     obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel
     return obstacles
@@ -42,9 +42,9 @@ class Params:
         self.ViconRate = 100 # [Hz]
         self.influence_radius = 1.4 # potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
-        self.num_robots = 4 # number of robots in the formation
+        self.num_robots = 8 # number of robots in the formation
         self.interrobots_dist = 0.3 # [m], distance between robots in default formation
-        self.max_sp_dist = 0.1 * self.drone_vel * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
+        self.max_sp_dist = 0.15 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
 class Robot:
     def __init__(self, id):
@@ -91,7 +91,7 @@ def visualize2D():
     plt.plot(robot1.route[:,0], robot1.route[:,1], linewidth=2, color='green', label="Leader's path", zorder=10)
     # for robot in robots[1:]: plt.plot(robot.route[:,0], robot.route[:,1], '--', linewidth=2, color='green', zorder=10)
     plt.plot(P[:,0], P[:,1], linewidth=3, color='orange', label='Global planner path')
-    # plt.plot(traj_global[sp_ind,0], traj_global[sp_ind,1], 'ro', color='blue', markersize=7, label='Global planner setpoint')
+    plt.plot(traj_global[sp_ind,0], traj_global[sp_ind,1], 'ro', color='blue', markersize=7, label='Global planner setpoint')
     plt.plot(xy_start[0],xy_start[1],'bo',color='red', markersize=20, label='start')
     plt.plot(xy_goal[0], xy_goal[1],'bo',color='green', markersize=20, label='goal')
     plt.legend()
@@ -108,7 +108,7 @@ obstacles = [
               # bugtrap
               np.array([[0.5, 0], [2.5, 0.], [2.5, 0.3], [0.5, 0.3]]),
               np.array([[0.5, 0.3], [0.8, 0.3], [0.8, 1.5], [0.5, 1.5]]),
-              np.array([[0.5, 1.5], [1.5, 1.5], [1.5, 1.8], [0.5, 1.8]]),
+              # np.array([[0.5, 1.5], [1.5, 1.5], [1.5, 1.8], [0.5, 1.8]]),
               # angle
               np.array([[-2, -2], [-0.5, -2], [-0.5, -1.8], [-2, -1.8]]),
               np.array([[-0.7, -1.8], [-0.5, -1.8], [-0.5, -0.8], [-0.7, -0.8]]),
@@ -275,9 +275,10 @@ if params.postprocessing:
     plt.figure(figsize=(10,6))
     # plt.subplot(2,1,2)
     Smean = np.mean( area_array )
-    print "\nMin formation area: %.2f [m^2]" %np.min( area_array )
-    print "Mean formation area: %.2f [m^2]" %Smean
-    print "Max formation area: %.2f [m^2]" %np.max( area_array )
+    print "\nMin formation area: %f [m^2]" %np.min( area_array )
+    print "Default formation area: %f [m^2]" %S0
+    print "Mean formation area: %f [m^2]" %Smean
+    print "Max formation area: %f [m^2]" %np.max( area_array )
     plt.title("Area of robots' formation")
     plt.plot(t_array[:-1], area_array, 'k', label='Formation area', linewidth=2)
     plt.plot(t_array, S0*np.ones_like(t_array), '--', label='Default area', linewidth=2)
