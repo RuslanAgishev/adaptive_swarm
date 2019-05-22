@@ -23,8 +23,8 @@ from matplotlib import cm
 def move_obstacles(obstacles, params):
     # small cubes movement
     # obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
-    obstacles[-2] += np.array([-0.003, 0.003]) * params.drone_vel
-    obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel
+    # obstacles[-2] += np.array([-0.003, 0.003]) * params.drone_vel
+    # obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel
     return obstacles
 
 class Params:
@@ -76,7 +76,7 @@ class Robot:
         self.vel_array.append(norm(self.V))
         dt = 0.01 * params.drone_vel / norm([ax, ay]) if norm([ax, ay])!=0 else 0.01
         # self.sp += dt**2/2. * np.array( [ax, ay] )
-        self.sp += dt*np.array( [ax, ay] ) + 0.1*dt**2/2. * np.array( [ax, ay] )
+        self.sp += dt*np.array( [ax, ay] ) #+ 0.1*dt**2/2. * np.array( [ax, ay] )
         self.route = np.vstack( [self.route, self.sp] )
 
 def visualize2D():
@@ -123,7 +123,7 @@ obstacles = [
               np.array([[2.3, -2.3], [2.4, -2.3], [2.4, -2.2], [2.3, -2.2]]),
               np.array([[0.0, -2.3], [0.1, -2.3], [0.1, -2.2], [0.0, -2.2]]),
             ]
-# obstacles = []
+obstacles = []
 
 robots = []
 for i in range(params.num_robots):
@@ -141,8 +141,9 @@ class Metrics:
         self.robots = []
         self.vels_mean = []
         self.vels_max = []
+        self.area_array = []
 
-        self.folder_to_save = '/home/rus/Desktop/'
+        self.folder_to_save = '/home/ruslan/Desktop/'
 
 metrics = Metrics()
 
@@ -226,120 +227,17 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 """ Flight data postprocessing """
 if params.postprocessing:
     t_array = t_array[1:]
+    metrics.t_array = t_array
     metrics.centroid_path = metrics.centroid_path[1:,:]
     metrics.centroid_path_length = path_length(metrics.centroid_path)
-    
-    for robot in robots:
-        robot.path_length = path_length(robot.route)
-        print "Robot %d path length: %.2f [m]" %(robot.id, robot.path_length)
-    metrics.t_reach_goal = t_array[-1]
-    print "Time to reach goal: %.2f [s]" %metrics.t_reach_goal
+    for robot in robots: metrics.robots.append( robot )
 
-    plt.figure(figsize=(10,10))
-    print "\nCentroid path: %.2f [m]" %metrics.centroid_path_length
-    plt.title("Drones trajectories.")
-    for robot in robots:
-        plt.plot(robot.route[:,0], robot.route[:,1], '--', label='drone %d' %robot.id, linewidth=2)
-    plt.plot(metrics.centroid_path[:,0], metrics.centroid_path[:,1], linewidth=3, label='centroid', color='k')
-    plt.legend()
-    plt.grid()
+    postprocessing(metrics, params)
 
-    plt.figure(figsize=(10,6))
-    # plt.subplot(2,1,1)
-    plt.title( "Robots Velocities" )
-    print "\n"
-    for robot in robots:
-        print "Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) )
-        print "Robot %d Max Velocity: %.2f [m/s]" %( robot.id, np.max(np.array(robot.vel_array)) )
-        metrics.vels_mean.append( np.mean(np.array(robot.vel_array)) )
-        metrics.vels_max.append( np.max(np.array(robot.vel_array)) )
-        metrics.robots.append( robot )
-    plt.plot( t_array, robot1.vel_array, '-', color='k', label='drone 1', linewidth=3)
-    for r in range(1, params.num_robots):
-        plt.plot(t_array, robots[r].vel_array, '--', label='drone %d' %(r+1), linewidth=2)
-    plt.xlabel('Time, [s]')
-    plt.ylabel('Velocity, [m/s]')
-    plt.legend()
-    plt.grid()
-
-    area_array = []
-    for i in range(len(robot1.route)-1):
-        X = np.array([]); Y = np.array([]); robots_poses = []
-        for robot in robots: robots_poses.append(robot.route[i,:])
-        robots_poses.sort(key=lambda p: atan2(p[1]-metrics.centroid_path[i,1], p[0]-metrics.centroid_path[i,0]))
-        for pose in robots_poses:
-            X = np.append( X, pose[0] )
-            Y = np.append( Y, pose[1] )
-        area_array.append(poly_area(X,Y))
-    area_array = area_array[1:]
-    # default formation area
-    if params.num_robots==3: S0 = 0.5*sqrt(3)/2.*params.interrobots_dist**2
-    elif params.num_robots==4: S0 = sqrt(3)/2.*params.interrobots_dist**2
-    else: S0 = area_array[0]
-
-    plt.figure(figsize=(10,6))
-    # plt.subplot(2,1,2)
-    Smean = np.mean( area_array )
-    print "\nMin formation area: %.2f [m^2]" %np.min( area_array ); metrics.S_min = np.min( area_array )
-    print "Default formation area: %f [m^2]" %S0;                   metrics.S_default = S0
-    print "Mean formation area: %.2f [m^2]" %Smean;                 metrics.S_mean = np.mean( area_array )
-    print "Max formation area: %.2f [m^2]" %np.max( area_array );   metrics.S_max = np.max( area_array )
-    plt.title("Area of robots' formation")
-    plt.plot(t_array[:-1], area_array, 'k', label='Formation area', linewidth=2)
-    plt.plot(t_array, S0*np.ones_like(t_array), '--', label='Default area', linewidth=2)
-    plt.plot(t_array, Smean*np.ones_like(t_array), '--', color='r', label='Mean area', linewidth=2)
-    plt.xlabel('Time, [s]')
-    plt.ylabel('Formation area, [m^2]')
-    plt.grid()
-    plt.legend()
-
-    plt.figure(figsize=(10,6))
-    plt.plot(t_array, metrics.mean_dists_array, label='Mean inter-robots distance', color='r')
-    plt.plot(t_array, metrics.max_dists_array, label='Max inter-robots distance', color='k')
-    plt.grid()
-    plt.xlabel('Time, [s]')
-    plt.ylabel('Distance, [m]')
-    plt.legend()
-    metrics.R_formation_mean = np.mean( metrics.max_dists_array )
-
-    fig = plt.figure(figsize=(10,10))
-    ax = fig.gca(projection='3d')
-    # plt.title ('Repulsive Potential')
-    start = meters2grid(xy_start); #ax.scatter3D(start[0], start[1], 100, color='r', s=100, zorder=10)
-    goal = meters2grid(xy_goal); #ax.scatter3D(goal[0], goal[1], 100, color='g', s=100, zorder=10)
-
-    X, Y = np.meshgrid (np.arange(500), np.arange(500))
-    Z = robots[0].U_r
-    surf = ax.plot_surface(X, Y, Z/np.max(Z)*200, cmap=plt.cm.jet, linewidth=0.01, vmin=0.0, vmax=200, zorder=1)
-    fig.colorbar( surf, shrink=0.5, aspect=5)
-
-    traj = meters2grid( metrics.centroid_path )
-    ax.plot(traj[:,0], traj[:,1], 100*np.ones(traj.shape[0]), label='Centroid trajectory', linewidth=3, color='r', zorder=0)
-    for robot in robots:
-        traj = meters2grid( robot.route )
-        ax.plot(traj[:,0], traj[:,1], 100*np.ones(traj.shape[0]), '--', label="Robots' trajectories", linewidth=1, color='y', zorder=1)
-
-    ax.view_init(elev=90, azim=-90)
-    ax.set_xlabel('X, [cm]')
-    ax.set_ylabel('Y, [cm]')
-    ax.set_zlabel('Z, [cm]')
-    ax.set_zlim([0, 400])
-
-    save_data(metrics)
+    # save_data(metrics)
 
 # close windows if Enter-button is pressed
 plt.draw()
