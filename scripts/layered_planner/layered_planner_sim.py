@@ -123,7 +123,7 @@ obstacles = [
               np.array([[2.3, -2.3], [2.4, -2.3], [2.4, -2.2], [2.3, -2.2]]),
               np.array([[0.0, -2.3], [0.1, -2.3], [0.1, -2.2], [0.0, -2.2]]),
             ]
-obstacles = []
+# obstacles = []
 
 robots = []
 for i in range(params.num_robots):
@@ -237,7 +237,7 @@ if params.postprocessing:
 
     postprocessing(metrics, params)
 
-    # save_data(metrics)
+    save_data(metrics)
 
 # close windows if Enter-button is pressed
 plt.draw()
