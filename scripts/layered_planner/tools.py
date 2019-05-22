@@ -209,7 +209,7 @@ def postprocessing(metrics, params, visualize=1):
     # default formation area
     if params.num_robots==3: S0 = 0.5*sqrt(3)/2.*params.interrobots_dist**2
     elif params.num_robots==4: S0 = sqrt(3)/2.*params.interrobots_dist**2
-    else: S0 = area_array[0]
+    else: S0 = metrics.area_array[1]
     metrics.area_array = metrics.area_array[1:]
     metrics.S_min = np.min( metrics.area_array )
     metrics.S_default = S0

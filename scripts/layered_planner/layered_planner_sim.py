@@ -23,8 +23,8 @@ from matplotlib import cm
 def move_obstacles(obstacles, params):
     # small cubes movement
     # obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
-    # obstacles[-2] += np.array([-0.003, 0.003]) * params.drone_vel
-    # obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel
+    obstacles[-2] += np.array([-0.003, 0.003]) * params.drone_vel
+    obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel
     return obstacles
 
 class Params:
@@ -42,7 +42,7 @@ class Params:
         self.ViconRate = 100 # [Hz]
         self.influence_radius = 1.4 # potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
-        self.num_robots = 4 # number of robots in the formation
+        self.num_robots = 8 # number of robots in the formation
         self.interrobots_dist = 0.3 # [m], distance between robots in default formation
         self.max_sp_dist = 0.15 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
@@ -143,7 +143,7 @@ class Metrics:
         self.vels_max = []
         self.area_array = []
 
-        self.folder_to_save = '/home/ruslan/Desktop/'
+        self.folder_to_save = '/home/ruslan/Desktop/8_drones/'
 
 metrics = Metrics()
 
@@ -235,8 +235,7 @@ if params.postprocessing:
     metrics.centroid_path_length = path_length(metrics.centroid_path)
     for robot in robots: metrics.robots.append( robot )
 
-    postprocessing(metrics, params)
-
+    postprocessing(metrics, params, visualize=1)
     save_data(metrics)
 
 # close windows if Enter-button is pressed
