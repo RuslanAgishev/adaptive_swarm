@@ -42,7 +42,7 @@ class Params:
         self.ViconRate = 100 # [Hz]
         self.influence_radius = 1.4 # potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
-        self.num_robots = 8 # number of robots in the formation
+        self.num_robots = 3 # number of robots in the formation
         self.interrobots_dist = 0.3 # [m], distance between robots in default formation
         self.max_sp_dist = 0.15 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
@@ -123,7 +123,7 @@ obstacles = [
               np.array([[2.3, -2.3], [2.4, -2.3], [2.4, -2.2], [2.3, -2.2]]),
               np.array([[0.0, -2.3], [0.1, -2.3], [0.1, -2.2], [0.0, -2.2]]),
             ]
-# obstacles = []
+obstacles = []
 
 robots = []
 for i in range(params.num_robots):
@@ -143,7 +143,7 @@ class Metrics:
         self.vels_max = []
         self.area_array = []
 
-        self.folder_to_save = '/home/ruslan/Desktop/8_drones/'
+        self.folder_to_save = '/home/rus/Desktop/'
 
 metrics = Metrics()
 
