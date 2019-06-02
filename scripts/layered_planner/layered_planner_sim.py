@@ -22,16 +22,17 @@ from matplotlib import cm
 
 def move_obstacles(obstacles, params):
     # small cubes movement
-    # obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
-    obstacles[-2] += np.array([-0.003, 0.003]) * params.drone_vel
-    obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel
+    obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
+    obstacles[-2] += np.array([-0.005, 0.005]) * params.drone_vel/2
+    obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel/2
     return obstacles
 
 class Params:
     def __init__(self):
-        self.animate = 0 # show RRT construction, set 0 to reduce time of the RRT algorithm
-        self.visualize = 0 # show constructed paths at the end of the RRT and path smoothing algorithms
+        self.animate = 1 # show RRT construction, set 0 to reduce time of the RRT algorithm
+        self.visualize = 1 # show constructed paths at the end of the RRT and path smoothing algorithms
         self.postprocessing = 1 # process and visualize the simulated experiment data after the simulation
+        self.savedata = 0 # save postprocessing metrics to the XLS-file
         self.maxiters = 500 # max number of samples to build the RRT
         self.goal_prob = 0.05 # with probability goal_prob, sample the goal
         self.minDistGoal = 0.25 # [m], min distance os samples from goal to add goal node to the RRT
@@ -40,11 +41,11 @@ class Params:
         self.world_bounds_y = [-2.5, 2.5] # [m], map size in Y-direction
         self.drone_vel = 4.0 # [m/s]
         self.ViconRate = 100 # [Hz]
-        self.influence_radius = 1.4 # potential fields radius, defining repulsive area size near the obstacle
+        self.influence_radius = 0.15 # [m] potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
-        self.num_robots = 3 # number of robots in the formation
+        self.num_robots = 6 # number of robots in the formation
         self.interrobots_dist = 0.3 # [m], distance between robots in default formation
-        self.max_sp_dist = 0.15 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
+        self.max_sp_dist = 0.2 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
 class Robot:
     def __init__(self, id):
@@ -81,7 +82,7 @@ class Robot:
 
 def visualize2D():
     draw_map(obstacles)
-    draw_gradient(robots[2].U) if params.num_robots>1 else draw_gradient(robots[0].f)
+    draw_gradient(robots[2].U) if params.num_robots>1 else draw_gradient(robots[0].U)
     for robot in robots: plt.plot(robot.sp[0], robot.sp[1], '^', color='blue', markersize=10, zorder=15) # robots poses
     robots_poses = []
     for robot in robots: robots_poses.append(robot.sp)
@@ -108,7 +109,7 @@ obstacles = [
               # bugtrap
               np.array([[0.5, 0], [2.5, 0.], [2.5, 0.3], [0.5, 0.3]]),
               np.array([[0.5, 0.3], [0.8, 0.3], [0.8, 1.5], [0.5, 1.5]]),
-              # np.array([[0.5, 1.5], [1.5, 1.5], [1.5, 1.8], [0.5, 1.8]]),
+              np.array([[0.5, 1.5], [1.5, 1.5], [1.5, 1.8], [0.5, 1.8]]),
               # angle
               np.array([[-2, -2], [-0.5, -2], [-0.5, -1.8], [-2, -1.8]]),
               np.array([[-0.7, -1.8], [-0.5, -1.8], [-0.5, -0.8], [-0.7, -0.8]]),
@@ -119,11 +120,19 @@ obstacles = [
               np.array([[2.47, -2.47], [2.5, -2.47], [2.5, 2.47], [2.47, 2.47]]), # comment this for better 3D visualization
 
               # moving obstacle
-              np.array([[-2.3, 2.0], [-2.2, 2.0], [-2.2, 2.1], [-2.3, 2.1]]),
+              # np.array([[-2.3, 2.0], [-2.2, 2.0], [-2.2, 2.1], [-2.3, 2.1]]),
               np.array([[2.3, -2.3], [2.4, -2.3], [2.4, -2.2], [2.3, -2.2]]),
               np.array([[0.0, -2.3], [0.1, -2.3], [0.1, -2.2], [0.0, -2.2]]),
             ]
-obstacles = []
+"""" Narrow passage """
+# passage_width = 0.3
+# passage_location = 0.0
+# obstacles = [
+#             # narrow passage
+#               np.array([[-2.5, -0.5], [-passage_location-passage_width/2., -0.5], [-passage_location-passage_width/2., 0.5], [-2.5, 0.5]]),
+#               np.array([[-passage_location+passage_width/2., -0.5], [2.5, -0.5], [2.5, 0.5], [-passage_location+passage_width/2., 0.5]]),
+#             ]
+# obstacles = []
 
 robots = []
 for i in range(params.num_robots):
@@ -161,7 +170,7 @@ if __name__ == '__main__':
     traj_global = waypts2setpts(P, params)
     P = np.vstack([P, xy_start])
     plt.plot(P[:,0], P[:,1], linewidth=3, color='orange', label='Global planner path')
-    plt.pause(0.1)
+    plt.pause(2.0)
 
     sp_ind = 0
     robot1.route = np.array([traj_global[0,:]])
@@ -236,7 +245,7 @@ if params.postprocessing:
     for robot in robots: metrics.robots.append( robot )
 
     postprocessing(metrics, params, visualize=1)
-    save_data(metrics)
+    if params.savedata: save_data(metrics)
 
 # close windows if Enter-button is pressed
 plt.draw()

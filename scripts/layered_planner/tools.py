@@ -233,8 +233,10 @@ def postprocessing(metrics, params, visualize=1):
     metrics.R_formation_mean = np.mean( metrics.max_dists_array )
     if visualize:
         plt.figure(figsize=(10,6))
-        plt.plot(metrics.t_array, metrics.mean_dists_array, label='Mean inter-robots distance', color='r')
-        plt.plot(metrics.t_array, metrics.max_dists_array, label='Max inter-robots distance', color='k')
+        l = params.interrobots_dist
+        plt.plot(metrics.t_array, l*np.ones_like(metrics.t_array), '--', label='Default distance', linewidth=2)
+        plt.plot(metrics.t_array, metrics.mean_dists_array, label='Mean inter-robots distance', color='r', linewidth=2)
+        plt.plot(metrics.t_array, metrics.max_dists_array, label='Max inter-robots distance', color='k', linewidth=2)
         plt.grid()
         plt.xlabel('Time, [s]')
         plt.ylabel('Distance, [m]')
@@ -246,7 +248,7 @@ def postprocessing(metrics, params, visualize=1):
         # start = meters2grid(xy_start); #ax.scatter3D(start[0], start[1], 100, color='r', s=100, zorder=10)
         # goal = meters2grid(xy_goal); #ax.scatter3D(goal[0], goal[1], 100, color='g', s=100, zorder=10)
         X, Y = np.meshgrid (np.arange(500), np.arange(500))
-        Z = metrics.robots[0].U_r
+        Z = metrics.robots[1].U_r if params.num_robots>1 else metrics.robots[0].U_r
         surf = ax.plot_surface(X, Y, Z/np.max(Z)*200, cmap=plt.cm.jet, linewidth=0.01, vmin=0.0, vmax=200, zorder=1)
         fig.colorbar( surf, shrink=0.5, aspect=5)
         traj = meters2grid( metrics.centroid_path )
