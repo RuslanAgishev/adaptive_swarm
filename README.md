@@ -1,3 +1,3 @@
 # Adaptive Swarm
 
-![potential_surface](https://drive.google.com/file/d/1RQvnx2D1nfXJPb4f0o6SIJDPJ02z-Xac/view?usp=drive_open)
+![potential_surface](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/surface_potential_trajs.png)
