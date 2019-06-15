@@ -11,7 +11,19 @@ import time
 import os
 from potential_fields import meters2grid, grid2meters
 from low_pass_filter import butter_lowpass_filter
+import psutil
 
+def memory_usage():
+    # return the memory usage in MiB
+    process = psutil.Process(os.getpid())
+    mem = process.memory_info()[0] / float(2 ** 20) # in mebibyte: 1 MiB = 1024^2 B
+    return mem
+
+def cpu_usage():
+    # return the CPU usage in %
+    # cpu_usage = float(os.popen('''grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage }' ''').readline())
+    cpu_usage = psutil.cpu_percent()
+    return cpu_usage # [%]
 
 def draw_map(obstacles):
     # Obstacles. An obstacle is represented as a convex hull of a number of points. 
@@ -215,12 +227,12 @@ def postprocessing(metrics, params, visualize=1):
     metrics.S_default = S0
     metrics.S_mean = np.mean( metrics.area_array )
     metrics.S_max = np.max( metrics.area_array )
+    print "\nMin formation area: %.2f [m^2]" %metrics.S_min
+    print "Default formation area: %f [m^2]" %S0
+    print "Mean formation area: %.2f [m^2]" %metrics.S_mean
+    print "Max formation area: %.2f [m^2]" %metrics.S_max
     if visualize:
         plt.figure(figsize=(10,6))
-        print "\nMin formation area: %.2f [m^2]" %metrics.S_min
-        print "Default formation area: %f [m^2]" %S0
-        print "Mean formation area: %.2f [m^2]" %metrics.S_mean
-        print "Max formation area: %.2f [m^2]" %metrics.S_max
         plt.title("Area of robots' formation")
         plt.plot(metrics.t_array[:-1], metrics.area_array, 'k', label='Formation area', linewidth=2)
         plt.plot(metrics.t_array, S0*np.ones_like(metrics.t_array), '--', label='Default area', linewidth=2)
@@ -231,6 +243,12 @@ def postprocessing(metrics, params, visualize=1):
         plt.legend()
 
     metrics.R_formation_mean = np.mean( metrics.max_dists_array )
+
+    metrics.cpu_usage_mean = np.mean( metrics.cpu_usage_array )
+    metrics.memory_usage_mean = np.mean( metrics.memory_usage_array )
+    print "\nMean CPU usage: %.2f [percentage]" %metrics.cpu_usage_mean
+    print "Mean memory usage: %.2f [MiB]" %metrics.memory_usage_mean
+
     if visualize:
         plt.figure(figsize=(10,6))
         l = params.interrobots_dist
@@ -293,6 +311,9 @@ def save_data(metrics, folder_name='output_%f'%time.time()):
     ws.write(11, 0, 'Acc_mean'); ws.write(11, 1, metrics.acc_mean)
     ws.write(12, 0, 'Jerk_mean'); ws.write(12, 1, metrics.jerk_mean)
     ws.write(13, 0, 'Snap_mean'); ws.write(13, 1, metrics.snap_mean)
+
+    ws.write(14, 0, 'CPU usage mean'); ws.write(14, 1, metrics.cpu_usage_mean)
+    ws.write(15, 0, 'Memory usage mean'); ws.write(15, 1, metrics.memory_usage_mean)
 
     os.mkdir(metrics.folder_to_save+folder_name)
     wb.save(metrics.folder_to_save+folder_name+'/results.xls')

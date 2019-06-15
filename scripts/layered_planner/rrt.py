@@ -9,10 +9,8 @@ from scipy.spatial import ConvexHull
 from matplotlib import path
 import time
 
+
 ##### RRT algorithm
-
-# Helper functions
-
 def isCollisionFreeVertex(obstacles, xy):
     collFree = True
 
@@ -117,7 +115,7 @@ def rrt_path(obstacles, xy_start, xy_goal, params):
             iters += 1
             continue
         
-        if params.animate:
+        if params.animate_rrt:
             # plt.plot(xy[0], xy[1], 'ro', color='k')
             plt.plot(new_node.p[0], new_node.p[1], 'bo',color = 'blue', markersize=5) # VERTICES
             plt.plot([closest_node.p[0], new_node.p[0]], [closest_node.p[1], new_node.p[1]], color='blue') # EDGES
@@ -159,7 +157,7 @@ def rrt_path(obstacles, xy_start, xy_goal, params):
             # print 'Reached RRT start node'
             break
     P = np.array(P)
-    # plt.plot( P[:,0], P[:,1], color='green', linewidth=5, label='path from RRT' )
+    plt.plot( P[:,0], P[:,1], color='green', linewidth=5, label='path from RRT' )
 
     return P
 
