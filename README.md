@@ -29,7 +29,7 @@ roslaunch adaptive_swarm connect123.launch
 rosrun adaptive_swarm layered_planner.py 
 ```
 <p float="left">
-  <img src="(https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real1.png" width="50" height="50" />
-  <img src="(https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real2.png" width="50" height="50" /> 
-  <img src="(https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real3.png" width="50" height="50" />
+  <img src="(https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real1.png" width="50" />
+  <img src="(https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real2.png" width="50" /> 
+  <img src="(https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real3.png" width="50" />
 </p>
