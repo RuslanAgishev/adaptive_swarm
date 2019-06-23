@@ -1,0 +1,4 @@
+scipy==1.1.0
+matplotlib==2.2.3
+numpy==1.15.2
+swarmlib==0.3.0
