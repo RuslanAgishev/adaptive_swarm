@@ -26,5 +26,7 @@ roslaunch adaptive_swarm connect123.launch
 ```
 - and command the drones to fly in a formation through a map of obstacles:
 ```bash
-rosrun adaptive_swarm layered_planner_sim.py 
+rosrun adaptive_swarm layered_planner.py 
 ```
+
+![real1](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real1.png) ![real2](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real2.png) ![real3](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real3.png)
