@@ -1,7 +1,5 @@
 # Adaptive Swarm
 
-<!--
-
 ![potential_surface](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/surface_potential_trajs.png)
 
 ## Package description
@@ -31,4 +29,4 @@ rosrun adaptive_swarm layered_planner.py
 ```
 <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real1.png" width="240"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real2.png" width="240"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real3.png" width="240"/>
 
--->
+
