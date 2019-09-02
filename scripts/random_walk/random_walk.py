@@ -4,6 +4,7 @@ equipped with 4 ranger sensors (front, back, left and right)
 for obstacles detection
 
 author: Ruslan Agishev (agishev_ruslan@mail.ru)
+reference: https://ieeexplore.ieee.org/abstract/document/6850799/s
 """
 
 import matplotlib.pyplot as plt
