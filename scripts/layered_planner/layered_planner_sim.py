@@ -22,14 +22,14 @@ from matplotlib import cm
 
 def move_obstacles(obstacles, params):
     # small cubes movement
-    # obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
+    obstacles[-3] += np.array([0.015, 0.0]) * params.drone_vel
     obstacles[-2] += np.array([-0.005, 0.005]) * params.drone_vel/2
     obstacles[-1] += np.array([0.0, 0.008]) * params.drone_vel/2
     return obstacles
 
 class Params:
     def __init__(self):
-        self.animate_rrt = 0 # show RRT construction, set 0 to reduce time of the RRT algorithm
+        self.animate_rrt = 1 # show RRT construction, set 0 to reduce time of the RRT algorithm
         self.visualize = 1 # show robots movement
         self.postprocessing = 1 # process and visualize the simulated experiment data after the simulation
         self.savedata = 0 # save postprocessing metrics to the XLS-file
@@ -43,7 +43,7 @@ class Params:
         self.ViconRate = 100 # [Hz]
         self.influence_radius = 0.15 # [m] potential fields radius, defining repulsive area size near the obstacle
         self.goal_tolerance = 0.05 # [m], maximum distance threshold to reach the goal
-        self.num_robots = 6 # number of robots in the formation
+        self.num_robots = 4 # number of robots in the formation
         self.interrobots_dist = 0.3 # [m], distance between robots in default formation
         self.max_sp_dist = 0.2 * self.drone_vel# * np.sqrt(self.num_robots) # [m], maximum distance between current robot's pose and the sp from global planner
 
@@ -120,7 +120,7 @@ obstacles = [
               np.array([[2.47, -2.47], [2.5, -2.47], [2.5, 2.47], [2.47, 2.47]]), # comment this for better 3D visualization
 
               # moving obstacle
-              # np.array([[-2.3, 2.0], [-2.2, 2.0], [-2.2, 2.1], [-2.3, 2.1]]),
+              np.array([[-2.3, 2.0], [-2.2, 2.0], [-2.2, 2.1], [-2.3, 2.1]]),
               np.array([[2.3, -2.3], [2.4, -2.3], [2.4, -2.2], [2.3, -2.2]]),
               np.array([[0.0, -2.3], [0.1, -2.3], [0.1, -2.2], [0.0, -2.2]]),
             ]
@@ -252,7 +252,7 @@ if params.postprocessing:
     metrics.centroid_path_length = path_length(metrics.centroid_path)
     for robot in robots: metrics.robots.append( robot )
 
-    postprocessing(metrics, params, visualize=0)
+    postprocessing(metrics, params, visualize=1)
     if params.savedata: save_data(metrics)
 
 # close windows if Enter-button is pressed
