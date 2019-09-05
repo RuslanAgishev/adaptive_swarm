@@ -26,7 +26,7 @@ def cpu_usage():
     return cpu_usage # [%]
 
 def draw_map(obstacles):
-    # Obstacles. An obstacle is represented as a convex hull of a number of points. 
+    # Obstacles. An obstacle is represented as a polygon of a number of points. 
     # First row is x, second is y (position of vertices)
 
     # Bounds on world
