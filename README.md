@@ -29,4 +29,16 @@ rosrun adaptive_swarm layered_planner.py
 ```
 <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real1.png" width="240"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real2.png" width="240"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real3.png" width="240"/>
 
+## Citation
+Feel free to cite my [Master thesis](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/MSc_Thesis_Skoltech.pdf), if you use the repository.
+```
+@MastersThesis{Agishev:Thesis:2019,
+    author     =     {Ruslan Agishev},
+    title     =     {{Adaptive Control of Swarm of Drones for
+Obstacle Avoidance}},
+    school     =     {Skolkovo Institute of Science and Technology},
+    address     =     {Moscow, Russia},
+    year     =     {2019},
+}
+```
 
