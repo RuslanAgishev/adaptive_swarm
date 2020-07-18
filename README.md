@@ -1,6 +1,6 @@
 # Adaptive Swarm
 
-<img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/passage_3_drones.gif" width="450"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/passage_3_drones_payload.gif" width="450"/>
+<img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/passage_3_drones.gif" width="400"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/passage_3_drones_payload.gif" width="400"/>
 
 ## Package description
 
