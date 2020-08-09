@@ -74,3 +74,5 @@ Obstacle Avoidance}},
 }
 ```
 
+## License <a name="license"></a>
+Project is distributed under [MIT License](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/LICENSE)
