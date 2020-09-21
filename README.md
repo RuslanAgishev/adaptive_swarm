@@ -51,10 +51,16 @@ The path planning algrithm is built with a known map assumption.
 You can define obstacles location of your environment in
 [`layered_planner.py`](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/scripts/layered_planner/layered_planner.py#L92).
 
-- Laucnh external position estimator (Vicon motion capture system), and connect to drones:
+- Launch external position estimator (Vicon motion capture system), and connect to drones:
 ```bash
 roslaunch adaptive_swarm connect123.launch
 ```
+
+Setup python path to swarmlib:
+```bash
+export PYTHONPATH=/path/to/catkin_ws/src/adaptive_swarm/scripts:$PYTHONPATH
+```
+
 - Command the drones to fly in a formation through a map of obstacles:
 ```bash
 rosrun adaptive_swarm layered_planner.py 
