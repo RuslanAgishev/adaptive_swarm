@@ -151,10 +151,10 @@ def path_length(pose_array):
 def postprocessing(metrics, params, visualize=1):
     for robot in metrics.robots:
         robot.path_length = path_length(robot.route)
-        print "Robot %d path length: %.2f [m]" %(robot.id, robot.path_length)
+        print("Robot %d path length: %.2f [m]" %(robot.id, robot.path_length))
     metrics.t_reach_goal = metrics.t_array[-1]
-    print "Time to reach goal: %.2f [s]" %metrics.t_reach_goal
-    print "\nCentroid path: %.2f [m]" %metrics.centroid_path_length
+    print("Time to reach goal: %.2f [s]" %metrics.t_reach_goal)
+    print("\nCentroid path: %.2f [m]" %metrics.centroid_path_length)
     if visualize:
         plt.figure(figsize=(10,10))
         plt.title("Drones trajectories.")
@@ -164,10 +164,10 @@ def postprocessing(metrics, params, visualize=1):
         plt.legend()
         plt.grid()
 
-    print "\n"
+    print("\n")
     for robot in metrics.robots:
-        print "Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) )
-        print "Robot %d Max Velocity: %.2f [m/s]" %( robot.id, np.max(np.array(robot.vel_array)) )
+        print("Robot %d Average Velocity: %.2f [m/s]" %( robot.id, np.mean(np.array(robot.vel_array)) ))
+        print("Robot %d Max Velocity: %.2f [m/s]" %( robot.id, np.max(np.array(robot.vel_array)) ))
         metrics.vels_mean.append( np.mean(np.array(robot.vel_array)) )
         metrics.vels_max.append( np.max(np.array(robot.vel_array)) )
     if visualize:
@@ -227,10 +227,10 @@ def postprocessing(metrics, params, visualize=1):
     metrics.S_default = S0
     metrics.S_mean = np.mean( metrics.area_array )
     metrics.S_max = np.max( metrics.area_array )
-    print "\nMin formation area: %.2f [m^2]" %metrics.S_min
-    print "Default formation area: %f [m^2]" %S0
-    print "Mean formation area: %.2f [m^2]" %metrics.S_mean
-    print "Max formation area: %.2f [m^2]" %metrics.S_max
+    print("\nMin formation area: %.2f [m^2]" %metrics.S_min)
+    print("Default formation area: %f [m^2]" %S0)
+    print("Mean formation area: %.2f [m^2]" %metrics.S_mean)
+    print("Max formation area: %.2f [m^2]" %metrics.S_max)
     if visualize:
         plt.figure(figsize=(10,6))
         plt.title("Area of robots' formation")
@@ -246,8 +246,8 @@ def postprocessing(metrics, params, visualize=1):
 
     metrics.cpu_usage_mean = np.mean( metrics.cpu_usage_array )
     metrics.memory_usage_mean = np.mean( metrics.memory_usage_array )
-    print "\nMean CPU usage: %.2f [percentage]" %metrics.cpu_usage_mean
-    print "Mean memory usage: %.2f [MiB]" %metrics.memory_usage_mean
+    print("\nMean CPU usage: %.2f [percentage]" %metrics.cpu_usage_mean)
+    print("Mean memory usage: %.2f [MiB]" %metrics.memory_usage_mean)
 
     if visualize:
         plt.figure(figsize=(10,6))

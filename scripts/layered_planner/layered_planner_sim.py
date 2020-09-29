@@ -187,10 +187,10 @@ if __name__ == '__main__':
 
     while True: # loop through all the setpoint from global planner trajectory, traj_global
         t_array.append( time.time() - t0 )
-        # print "Current time [sec]: ", time.time() - t0
+        # print("Current time [sec]: ", time.time() - t0)
         dist_to_goal = norm(robot1.sp - xy_goal)
         if dist_to_goal < params.goal_tolerance: # [m]
-            print 'Goal is reached'
+            print('Goal is reached')
             break
         if len(obstacles)>2: obstacles = move_obstacles(obstacles, params) # change poses of some obstacles on the map
 
@@ -227,8 +227,8 @@ if __name__ == '__main__':
         # Algorithm performance (CPU and memory usage)
         metrics.cpu_usage_array.append( cpu_usage() )
         metrics.memory_usage_array.append( memory_usage() )
-        # print "CPU: ", cpu_usage()
-        # print "Memory: ", memory_usage()
+        # print("CPU: ", cpu_usage())
+        # print("Memory: ", memory_usage())
 
         # visualization
         if params.visualize:

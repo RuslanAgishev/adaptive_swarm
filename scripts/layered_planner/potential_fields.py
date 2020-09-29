@@ -82,7 +82,7 @@ def gradient_planner (f, start, goal, maxiters=200):
         dist_to_goal = norm(grid2meters(current_point)-grid2meters(end_coords))
         dist_to_goal_array.append(dist_to_goal)
         if len(dist_to_goal_array)==10 and abs(min(dist_to_goal_array) - max(dist_to_goal_array)) < 0.02:
-        	print "Robot is stopped"
+        	print("Robot is stopped")
         	# print abs(min(dist_to_goal_array) - max(dist_to_goal_array))
         	break
         if dist_to_goal < 0.1: # [m]
