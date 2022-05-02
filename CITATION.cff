@@ -4,6 +4,9 @@ authors:
 - family-names: "Agishev"
   given-names: "Ruslan"
   orcid: "https://orcid.org/0000-0002-9169-2684"
+- family-names: "Tsykunov"
+  given-names: "Evgeny"
+  orcid: 0000-0003-1123-2774
 title: "Adaptive Control of Swarm of Drones for Obstacle Avoidance"
 version: 0.0.1
 date-released: 2019-05-22
