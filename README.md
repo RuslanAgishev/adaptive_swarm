@@ -71,7 +71,7 @@ rosrun adaptive_swarm layered_planner.py
 Feel free to cite my [Master thesis](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/MSc_Thesis_Skoltech.pdf), if you find the package useful for your research.
 ```
 @software{Agishev_Adaptive_Control_of_2019,
-author = {Agishev, Ruslan and Tsykunov Evgeny},
+author = {Agishev, Ruslan and Tsykunov, Evgeny},
 month = {5},
 title = {{Adaptive Control of Swarm of Drones for Obstacle Avoidance}},
 url = {https://github.com/RuslanAgishev/adaptive_swarm},
