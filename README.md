@@ -1,10 +1,14 @@
 # Adaptive Swarm
+[![ToH](http://img.shields.io/badge/IEEE-ToH2019-blue.svg?style=plastic)](https://ieeexplore.ieee.org/document/8758191)
+[![CHI](http://img.shields.io/badge/iHDI2019-workshop-critical.svg?style=plastic)](https://hal.science/hal-02128383/document)
+[![Thesis](http://img.shields.io/badge/Msc-Thesis-green.svg?style=plastic)](https://github.com/RuslanAgishev/adaptive_swarm/blob/90d7066fce9917577bab0a8fa40fb93e4ee564f8/MSc_Thesis_Skoltech.pdf)
 
 <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/passage_3_drones.gif" width="350"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/passage_3_drones_payload.gif" width="350"/>
 
 ## Package description
 
 This project is a layered path planner algorithm to solve multiple agents navigation problem in a cluttered environment.
+Please, refer to the [Master Thesis](https://github.com/RuslanAgishev/adaptive_swarm/blob/90d7066fce9917577bab0a8fa40fb93e4ee564f8/MSc_Thesis_Skoltech.pdf) for more details.
 
 The general path planning problem is divided into approximate global trajectory construction, which is further smoothed by a local path planning method.
 The proposed approach provides a solution based on a leader-followers architecture with a prescribed formation geometry that adapts dynamically to the environment and avoids collisions.
@@ -68,16 +72,32 @@ rosrun adaptive_swarm layered_planner.py
 <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real1.png" width="240"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real2.png" width="240"/> <img src="https://github.com/RuslanAgishev/adaptive_swarm/blob/master/figures/layered_planner/narrow_passage/real3.png" width="240"/>
 
 ## Citation
-Feel free to cite my [Master thesis](https://github.com/RuslanAgishev/adaptive_swarm/blob/master/MSc_Thesis_Skoltech.pdf), if you find the package useful for your research.
-```
-@software{Agishev_Adaptive_Control_of_2019,
-author = {Agishev, Ruslan and Tsykunov, Evgeny},
-month = {5},
-title = {{Adaptive Control of Swarm of Drones for Obstacle Avoidance}},
-url = {https://github.com/RuslanAgishev/adaptive_swarm},
-school = {Skolkovo Institute of Science and Technology},
-version = {0.0.1},
-year = {2019}
+Feel free to cite the papers, if you find the package useful for your research.
+
+```bibtex
+@article{tsykunov2019swarmtouch,
+  title={Swarmtouch: Guiding a swarm of micro-quadrotors with impedance control using a wearable tactile interface},
+  author={Tsykunov, Evgeny and Agishev, Ruslan and Ibrahimov, Roman and Labazanova, Luiza and Tleugazy, Akerke and Tsetserukou, Dzmitry},
+  journal={IEEE transactions on haptics},
+  volume={12},
+  number={3},
+  pages={363--374},
+  year={2019},
+  publisher={IEEE}
+}
+@inproceedings{agishev:hal-02128383,
+  TITLE = {{Tactile Interaction of Human with Swarm of Nano-Quadrotors augmented with Adaptive Obstacle Avoidance}},
+  AUTHOR = {Agishev, Ruslan and Tsykunov, Evgeny and Labazanova, Luiza and Tleugazy, Akerke and Tsetserukou, Dzmitry},
+  URL = {https://hal.science/hal-02128383},
+  BOOKTITLE = {{1st International Workshop on Human-Drone Interaction}},
+  ADDRESS = {Glasgow, United Kingdom},
+  ORGANIZATION = {{Ecole Nationale de l'Aviation Civile [ENAC]}},
+  YEAR = {2019},
+  MONTH = May,
+  KEYWORDS = {Human ; robot interaction ; tactile display ; wearable computers ; robot formation motion planning ; impedance control ; potential fields},
+  PDF = {https://hal.science/hal-02128383/file/HDI_2019_paper_14.pdf},
+  HAL_ID = {hal-02128383},
+  HAL_VERSION = {v1},
 }
 ```
 
